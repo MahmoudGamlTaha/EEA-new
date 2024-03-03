@@ -1,0 +1,16 @@
+{
+  "UNIQUE_RECEIPT_VOUCHER_SERIAL": "database.receiptVoucher.uniqueSerial",
+  "FK_RECEIPT_VOUCHERS_USER": "database.receiptVoucher.invalidChanger",
+  "FK_RECEIPT_VOUCHERS_SOURCE": "database.receiptVoucher.invalidSource",
+  "FK_RECEIPT_VOUCHERS_BRANCH": "database.receiptVoucher.invalidBranch",
+  "FK_RECEIPT_VOUCHERS_CURRENCY": "database.receiptVoucher.invalidCurrency",
+  "FK_RECEIPT_VOUCHERS_DONOR": "database.receiptVoucher.invalidDonor",
+  "FK_RECEIPT_VOUCHERS_STATUS": "database.receiptVoucher.invalidStatus",
+  "RECEIPT_PAYMENT_DETAILS_CC_TYPE": "database.receiptPayment.invalidCCType",
+  "RECEIPT_PAYMENT_DETAILS_CC_POS_MACHINE": "database.receiptPayment.invalidMachine",
+  "RECEIPT_PAYMENT_DETAILS_CHEQUE_BANK": "database.receiptPayment.invalidBank",
+  "RECEIPT_PAYMENT_DETAILS_MONTHLY_DEDUCTION_BANK": "",
+  "FK_RECEIPT_RECEIPT_ACTIVITY_DETAILS_ACTIVITY": "database.receiptDetail.invalidActivity",
+  "FK_RECEIPT_RECEIPT_ACTIVITY_DETAILS_RECEIPT_VOUCHER": "",
+  "CHECK_POSITIVE_MONEY": "database.receiptVoucher.positiveMoney"
+}

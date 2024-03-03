@@ -1,0 +1,233 @@
+﻿CREATE TABLE ENTITIES (
+	ID int NOT NULL PRIMARY KEY,
+    NAME varchar(500) NOT NULL UNIQUE
+);
+INSERT INTO ENTITIES (ID,NAME)
+VALUES (1, 'جمعيه احياء التراث');
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE BANK_TYPES (
+	ID int NOT NULL PRIMARY KEY,
+    NAME varchar(50) NOT NULL
+);
+INSERT INTO BANK_TYPES (ID,NAME)
+VALUES (1, 'بنك المؤسسه');
+
+INSERT INTO BANK_TYPES (ID,NAME)
+VALUES (2, 'بنك متبرع');
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE BANKS (
+	ID int NOT NULL IDENTITY PRIMARY KEY,
+    ENTITY_ID int NOT NULL,
+    TYPE_ID int NOT NULL,
+    NAME varchar(500) NOT NULL,
+    CODE varchar(10),
+    CONSTRAINT UNIQUE_BANKS_NAME UNIQUE (NAME,ENTITY_ID),
+	CONSTRAINT FK_BANKS_ENTITY FOREIGN KEY (ENTITY_ID)
+				REFERENCES ENTITIES(ID)
+				ON DELETE CASCADE
+				ON UPDATE CASCADE,
+	CONSTRAINT FK_BANKS_TYPE FOREIGN KEY (TYPE_ID)
+				REFERENCES BANK_TYPES(ID)
+				--ON DELETE NO ACTION
+				ON UPDATE CASCADE
+);
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE BRANCHES (
+	ID int NOT NULL IDENTITY PRIMARY KEY,
+    BANK_ID int NOT NULL,
+    NAME varchar(500) NOT NULL,
+    ADDRESS varchar(1000),
+	CONSTRAINT FK_BRANCHES_BANK FOREIGN KEY (BANK_ID)
+				REFERENCES BANKS(ID)
+				ON DELETE CASCADE
+				ON UPDATE CASCADE
+);
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE ACCOUNT_TYPES (
+	ID int NOT NULL PRIMARY KEY,
+    NAME varchar(50) NOT NULL UNIQUE
+
+);
+INSERT INTO ACCOUNT_TYPES (ID,NAME)
+VALUES (1, 'جارى');
+
+INSERT INTO ACCOUNT_TYPES (ID,NAME)
+VALUES (2, 'استثمار');
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE ACCOUNTS (
+	ID int NOT NULL IDENTITY PRIMARY KEY,
+    BANK_BRANCH_ID int NOT NULL,
+    ACCOUNT_NUM varchar(50) NOT NULL,
+	TYPE_ID int NOT NULL,
+    CONSTRAINT UNIQUE_ACCOUNT_NUM UNIQUE (BANK_BRANCH_ID,ACCOUNT_NUM),
+	CONSTRAINT FK_ACCOUNTS_BRANCH FOREIGN KEY (BANK_BRANCH_ID)
+				REFERENCES BRANCHES(ID)
+				ON DELETE CASCADE
+				ON UPDATE CASCADE,
+	CONSTRAINT FK_ACCOUNTS_TYPE FOREIGN KEY (TYPE_ID)
+				REFERENCES ACCOUNT_TYPES(ID)
+				--ON DELETE NO ACTION,
+				ON UPDATE CASCADE
+
+);
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE CONTACT_PERSON (
+	ID int NOT NULL IDENTITY PRIMARY KEY,
+    BANK_BRANCH_ID int NOT NULL,
+	NAME varchar(500),
+    PHONE  varchar(30),
+    EMAIL  varchar(50),
+	CONSTRAINT FK_CONTACT_PERSON_BRANCH FOREIGN KEY (BANK_BRANCH_ID)
+				REFERENCES BRANCHES(ID)
+				ON DELETE CASCADE
+				ON UPDATE CASCADE
+);
+-----------------------------------------------------------------
+-------------------------years and periods-----------------------
+-----------------------------------------------------------------
+CREATE TABLE FISCAL_YEARS (
+	ID           int NOT NULL IDENTITY PRIMARY KEY,
+	ENTITY_ID 	 int NOT NULL,
+    NAME         VARCHAR(100) NOT NULL,
+	CLOSED	     BIT NOT NULL DEFAULT 0,
+    START_DATE   DATE NOT NULL,
+    END_DATE     DATE Not NULL, -- ask adel
+    TIME_STAMP   DATETIME NOT NULL,
+	CONSTRAINT FK_FISCAL_YEARS_ENTITY FOREIGN KEY (ENTITY_ID)
+				REFERENCES ENTITIES(ID)
+				ON DELETE CASCADE
+				ON UPDATE CASCADE,
+    CONSTRAINT UNIQUE_FISCAL_YEAR UNIQUE (NAME,ENTITY_ID),
+	--  check if year is COMPLETE year
+	CONSTRAINT CHECK_COMPLETE_YEAR CHECK (DATEADD(DAY,-1, DATEADD(year, 1, START_DATE))=END_DATE)
+
+);
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+CREATE TABLE FISCAL_YEARS_PERIODS (
+	ID					int NOT NULL IDENTITY PRIMARY KEY,
+    FISCAL_YEAR_ID		int NOT NULL,
+    NAME				VARCHAR(100) NOT NULL,
+	CLOSED				BIT NOT NULL DEFAULT 0,
+    START_DATE			DATE NOT NULL,
+    END_DATE			DATE Not NULL, -- ask adel
+    TIME_STAMP			DATETIME NOT NULL,
+    CONSTRAINT FK_FISCAL_PERIODS_YEAR FOREIGN KEY (FISCAL_YEAR_ID)
+				REFERENCES FISCAL_YEARS(ID)
+				ON DELETE CASCADE
+				ON UPDATE CASCADE,
+    CONSTRAINT UNIQUE_FISCAL_YEAR_PERIOD UNIQUE (NAME,FISCAL_YEAR_ID)
+);
+
+------------------------------------------------------------
+------------------------------------------------------------
+CREATE TABLE RECEIPT_VOUCHERS (
+    ID                  int NOT NULL IDENTITY PRIMARY KEY,
+    ENTITY_ID           int NOT NULL,
+    CHANGER_ID          int NOT NULL,
+    LAST_UPDATE_DATE    datetime2(0) NOT NULL,
+    SERIAL              varchar(20) NOT NULL,
+    DATE                date NOT NULL,
+    SOURCE_ID           int NOT NULL,
+    BRANCH_ID           int NOT NULL,
+    CURRENCY_ID         int NOT NULL,
+    STATUS_ID           int NOT NULL,
+    DONOR_ID            int,
+    PAYMENT_DETAIL_ID   int NOT NULL,
+
+    CONSTRAINT UNIQUE_RECEIPT_VOUCHER_SERIAL UNIQUE (ENTITY_ID, SERIAL),
+
+    CONSTRAINT FK_RECEIPT_VOUCHERS_USER FOREIGN KEY (CHANGER_ID) REFERENCES gn_user (id),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_ENTITY FOREIGN KEY(ENTITY_ID) REFERENCES ENTITIES(ID),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_SOURCE FOREIGN KEY(SOURCE_ID) REFERENCES RECEIPT_SOURCES(ID),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_BRANCH FOREIGN KEY(BRANCH_ID) REFERENCES FIN_BRANCHES(ID),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_CURRENCY FOREIGN KEY(CURRENCY_ID) REFERENCES CURRENCIES(ID),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_DONOR FOREIGN KEY(DONOR_ID) REFERENCES DONORS(ID),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_PAYMENT_DETAIL FOREIGN KEY(PAYMENT_DETAIL_ID) REFERENCES RECEIPT_PAYMENT_DETAILS(ID),
+    CONSTRAINT FK_RECEIPT_VOUCHERS_STATUS FOREIGN KEY(STATUS_ID) REFERENCES gn_workflow_statuses(ID),
+
+);
+-------------------------------------------------------------
+CREATE TABLE RECEIPT_SOURCES (
+    ID                  int NOT NULL IDENTITY PRIMARY KEY,
+    ENTITY_ID           int NOT NULL,
+    CHANGER_ID          int NOT NULL,
+    LAST_UPDATE_DATE    datetime2(0) NOT NULL,
+    NAME                varchar(50) NOT NULL,
+    DONOR_REQUIRED      BIT NOT NULL DEFAULT 0,
+    NAME_AR             varchar(50),
+    NAME_EN             varchar(50)
+
+    CONSTRAINT  UNIQUE_RECEIPT_SOURCE_NAME UNIQUE (ENTITY_ID, NAME),
+    CONSTRAINT  CHECK_RECEIPT_SOURCE_NAME  CHECK (NAME IN ('RECEPTION', 'E_WEBSITE', 'DEDUCTIONS', 'ENDOWMENT')),
+
+    CONSTRAINT FK_RECEIPT_SOURCES_USER FOREIGN KEY (CHANGER_ID) REFERENCES gn_user (id),
+    CONSTRAINT FK_RECEIPT_SOURCES_ENTITY FOREIGN KEY(ENTITY_ID) REFERENCES ENTITIES(ID)
+
+);
+
+INSERT INTO RECEIPT_SOURCES(ENTITY_ID, CHANGER_ID, LAST_UPDATE_DATE, NAME, DONOR_REQUIRED, NAME_AR, NAME_EN) VALUES (3,1,SYSDATETIME(),'RECEPTION', 1, 'نظام الاستقبال', 'Reception');
+INSERT INTO RECEIPT_SOURCES(ENTITY_ID, CHANGER_ID, LAST_UPDATE_DATE, NAME, DONOR_REQUIRED, NAME_AR, NAME_EN) VALUES (3,1,SYSDATETIME(),'E_WEBSITE', 0, 'الموقع الالكتروني', 'electronic website');
+INSERT INTO RECEIPT_SOURCES(ENTITY_ID, CHANGER_ID, LAST_UPDATE_DATE, NAME, DONOR_REQUIRED, NAME_AR, NAME_EN) VALUES (3,1,SYSDATETIME(),'DEDUCTIONS', 0, 'الاستقطاعات', 'deductions');
+INSERT INTO RECEIPT_SOURCES(ENTITY_ID, CHANGER_ID, LAST_UPDATE_DATE, NAME, DONOR_REQUIRED, NAME_AR, NAME_EN) VALUES (3,1,SYSDATETIME(),'ENDOWMENT', 1, 'ريع الوقف', 'Endowment income');
+
+---------------------------------------------------------
+CREATE TABLE RECEIPT_PAYMENT_DETAILS (
+    ID                          int NOT NULL IDENTITY PRIMARY KEY,
+    CHANGER_ID                  int,
+    LAST_UPDATE_DATE            datetime2(0),
+    METHOD                      varchar(50) NOT NULL,
+    CC_TYPE_ID                  int,
+    CC_VOUCHER_NUMBER           varchar(50),
+    CC_POS_MACHINE_ID           int,
+    CHEQUE_NUMBER               varchar(50),
+    CHEQUE_BANK_ID              int,
+    CHEQUE_DUE_DATE             date,
+    E_TREASURY_REF_NUMBER       varchar(50),
+    E_PAYMENT_FROM_DATE         date,
+    E_PAYMENT_TO_DATE           date,
+    MONTHLY_DEDUCTION_BANK_ID   int,
+    MONTHLY_DEDUCTION_MONTH     int,
+    MONTHLY_DEDUCTION_YEAR      int,
+    ENDOWMENT_NUMBER            int,
+    ENDOWMENT_INCOME_FROM_DATE  date,
+    ENDOWMENT_INCOME_TO_DATE    date,
+
+    CONSTRAINT  CHECK_RECEIPT_PAYMENT_DETAILS_METHOD CHECK (METHOD IN ('CREDIT_CARD', 'CHEQUE', 'E_TREASURY', 'E_PAYMENT', 'MONTHLY_DEDUCTION', 'ENDOWMENT_INCOME')),
+
+     CONSTRAINT FK_RECEIPT_PAYMENT_DETAILS_USER FOREIGN KEY (CHANGER_ID) REFERENCES gn_user (id),
+     CONSTRAINT RECEIPT_PAYMENT_DETAILS_CC_TYPE FOREIGN KEY(CC_TYPE_ID) REFERENCES fn_credit_card_types(ID),
+     CONSTRAINT RECEIPT_PAYMENT_DETAILS_CC_POS_MACHINE FOREIGN KEY(CC_POS_MACHINE_ID) REFERENCES fn_pos_machines(ID),
+     CONSTRAINT RECEIPT_PAYMENT_DETAILS_CHEQUE_BANK FOREIGN KEY(CHEQUE_BANK_ID) REFERENCES BANKS(ID),
+     CONSTRAINT RECEIPT_PAYMENT_DETAILS_MONTHLY_DEDUCTION_BANK FOREIGN KEY(MONTHLY_DEDUCTION_BANK_ID) REFERENCES BANKS(ID)
+ );
+---------------------------------------------------------------------------
+CREATE TABLE RECEIPT_ACTIVITY_DETAILS(
+    ID                          int NOT NULL IDENTITY PRIMARY KEY,
+    CHANGER_ID                  int,
+    LAST_UPDATE_DATE            datetime2(0),
+    ACTIVITY_ID                 int NOT NULL,
+    RECEIPT_VOUCHER_ID          int NOT NULL,
+    MONEY                       DECIMAL (20,8) NOT NULL,
+
+    CONSTRAINT FK_RECEIPT_RECEIPT_ACTIVITY_DETAILS_USER FOREIGN KEY (CHANGER_ID) REFERENCES gn_user (id),
+    CONSTRAINT FK_RECEIPT_RECEIPT_ACTIVITY_DETAILS_ACTIVITY FOREIGN KEY (ACTIVITY_ID) REFERENCES gn_activities (id),
+    CONSTRAINT FK_RECEIPT_RECEIPT_ACTIVITY_DETAILS_RECEIPT_VOUCHER FOREIGN KEY (RECEIPT_VOUCHER_ID) REFERENCES RECEIPT_VOUCHERS (ID),
+
+    CONSTRAINT CHECK_POSITIVE_MONEY CHECK (MONEY > 0)
+
+);
+---------------------------------------------------------------------------
+
+INSERT INTO fn_credit_card_types(ID, ENTITY_ID, CHANGER_ID, LAST_UPDATE_DATE, NAME) VALUES (1, 3, 1, SYSDATETIME(), 'K_NET');
+INSERT INTO gn_workflow_statuses(ID, CHANGER_ID, LAST_UPDATE_DATE, NAME) VALUES (1, 1, SYSDATETIME(), 'جاري المراجعة');
+INSERT INTO gn_workflow_statuses(ID, CHANGER_ID, LAST_UPDATE_DATE, NAME) VALUES (2, 1, SYSDATETIME(), 'معتمد');
+INSERT INTO gn_workflow_statuses(ID, CHANGER_ID, LAST_UPDATE_DATE, NAME) VALUES (3, 1, SYSDATETIME(), 'مرفوض');
+
+INSERT INTO gn_activities(CHANGER_ID, LAST_UPDATE_DATE, administrative_structure_id, main_activity_id, country_id, code, name, description) VALUES (1, SYSDATETIME(), 1, 1, 1, 'MOQ', 'بناء مساجد', 'مسجد مساحة 150 متر مربع بحي الأزهر');
