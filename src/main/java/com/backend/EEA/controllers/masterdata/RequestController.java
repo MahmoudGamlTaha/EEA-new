@@ -71,8 +71,5 @@ public class RequestController extends BaseRestController<RequestHeader, Request
          RequestFeesDto requestFeesDto = this.requestHeaderService.calculateCharge(requestId, currencyRate);
          return buildResponseEntity(true, "success", requestFeesDto,HttpStatus.OK);
     }
-    @RequestMapping(value = "/change-harbor", method = RequestMethod.GET)
-    public ResponseEntity<ResponsePojo> changeHarbor(){
 
-    }
 }
