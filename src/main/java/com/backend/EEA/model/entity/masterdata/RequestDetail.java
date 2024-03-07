@@ -43,7 +43,7 @@ public class RequestDetail extends BaseHeaderEntityGen {
     @ManyToOne
     @JoinColumn(name = "front_image_from_acceptance")
     private Attachment frontImageFromAcceptance;
-    private H
+
 
     @Column(name = "company_accept_number")
     private Long companyAcceptanceNumber;

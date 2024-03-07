@@ -501,7 +501,8 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
         logger.setRowId(requestId);
         logger.setEntityId(getEntityId());
         logger.setChangerId(1L);
-        if(administration == null){
+        if(administration == null && userSessionDto.getAdministrativeId() != null){
+
           AdministrativeStructure structure   = this.administrativeStructureRepository.findById(userSessionDto.getAdministrativeId()).orElse(null);
           administration = structure.getName();
         }
