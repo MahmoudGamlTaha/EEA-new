@@ -18,4 +18,5 @@ public class Comment extends BaseHeaderEntityGen {
 
     @OneToMany(mappedBy = "comment")
     private List<Attachment> attachments;
+
 }
