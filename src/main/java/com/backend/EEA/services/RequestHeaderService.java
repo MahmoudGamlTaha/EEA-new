@@ -13,6 +13,7 @@ import com.backend.EEA.model.entity.masterdata.*;
 import com.backend.EEA.model.entity.operation.Logger;
 import com.backend.EEA.model.enums.CustomerFeesStatus;
 import com.backend.EEA.model.enums.CustomerRequestStatus;
+import com.backend.EEA.model.payload.request.AddCommentsToRequestHeaderRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,8 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
     @Autowired
     RequestFeesRepository requestFeesRepository;
+    @Autowired
+    CommentRepository commentRepository;
 
     @Autowired
     RdfRepository rdfRepository;
@@ -588,4 +591,14 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     }
 
 
+  public RequestHeaderDto addCommentsToRequest(Long requestId, AddCommentsToRequestHeaderRequest request) {
+      RequestHeader requestHeader = requestHeaderRepository.findById(requestId).orElseThrow(()->new BusinessException("Request Header is not found"));
+      for(CommentsDto commentsDto : request.getCommentsList()){
+          Comment comment = new Comment();
+          comment.setComment(commentsDto.getComment());
+          comment.setRequestHeader(requestHeader);
+          commentRepository.save(comment);
+      }
+      return requestHeaderMapper.toRequestHeaderDto(requestHeader);
+  }
 }
