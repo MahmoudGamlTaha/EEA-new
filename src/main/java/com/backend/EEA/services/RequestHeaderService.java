@@ -13,6 +13,7 @@ import com.backend.EEA.model.entity.masterdata.*;
 import com.backend.EEA.model.entity.operation.Logger;
 import com.backend.EEA.model.enums.CustomerFeesStatus;
 import com.backend.EEA.model.enums.CustomerRequestStatus;
+import com.backend.EEA.model.pojos.SortPojo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,10 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     @Override
     protected Specification<RequestHeader> buildSpecification(RequestHeaderSearchForm requestHeaderSearchForm) {
         UserSessionDto userSessionDto = getLoggedInUserSession();
+        SortPojo sortPojo = new SortPojo();
+        sortPojo.setSortDirection("desc");
+        sortPojo.setFieldName("id");
+        requestHeaderSearchForm.setSortPojo(sortPojo);
         if(userSessionDto.getAuthorities().contains(new SimpleGrantedAuthority("customer")))
               requestHeaderSearchForm.setRequesterId(userSessionDto.getId());
         else if(userSessionDto.getAuthorities().contains(new SimpleGrantedAuthority("user"))||
@@ -360,7 +365,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
           UnloadWay unloadWay = unloadWayRepository.findById(requestHeader.getUnloadWayId()).orElse(null);
           Rdf rdf = null;
-
+//CurrencyRate currencyRate = new CurrencyRate();
+//currencyRate.setEntityId(1L);
+  //      currencyRate.setCurrencyId(req);
         RequestFees requestFees = this.requestFeesRepository.findByRequestId(requestId).orElse(new RequestFees());
           Double edraa = requestHeader.getWeightInTon()* requestHeader.getPricePerTon() * coalType.getRatioPricePerTon() * rate ;
          Double edraaFee = unloadWay.getCost() ;
