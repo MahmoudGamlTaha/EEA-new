@@ -3,6 +3,7 @@ package com.backend.EEA.controllers.masterdata;
 
 import com.backend.EEA.controllers.BaseRestController;
 import com.backend.EEA.model.dto.masterdata.RequestFeesDto;
+import com.backend.EEA.model.dto.masterdata.RequestFeesInvoiceDto;
 import com.backend.EEA.model.dto.search.RequestFeeSearchForm;
 import com.backend.EEA.model.entity.masterdata.RequestFees;
 import com.backend.EEA.model.pojos.ResponsePojo;
@@ -28,6 +29,11 @@ public class RequestFeesController extends BaseRestController<RequestFees, Reque
     public ResponseEntity<ResponsePojo> findRdfByRequestId(@RequestParam("requestId") Long requestId){
         RequestFees requestFees = this.requestFeeService.findFeesByRequestId(requestId);
         return buildResponseEntity(true, "success",requestFees, HttpStatus.OK);
+    }
+    @GetMapping(value = "/paidFeesInvoice")
+    public  ResponseEntity<ResponsePojo> generateInvoice(@RequestParam("requestId") Long requestId){
+         RequestFeesInvoiceDto requestFeesInvoiceDto = this.requestFeeService.getRequestInvoice(requestId);
+        return buildResponseEntity(true, "success", requestFeesInvoiceDto,HttpStatus.OK);
     }
 
 

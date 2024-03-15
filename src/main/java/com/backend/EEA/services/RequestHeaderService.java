@@ -365,9 +365,11 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
           UnloadWay unloadWay = unloadWayRepository.findById(requestHeader.getUnloadWayId()).orElse(null);
           Rdf rdf = null;
-//CurrencyRate currencyRate = new CurrencyRate();
-//currencyRate.setEntityId(1L);
-  //      currencyRate.setCurrencyId(req);
+         CurrencyRate currencyRate = new CurrencyRate();
+         currencyRate.setEntityId(1L);
+         currencyRate.setCurrencyId(requestHeader.getCurrencyId());
+         currencyRate.setRate(rate);
+         currencyRate.setDate(new Date());
         RequestFees requestFees = this.requestFeesRepository.findByRequestId(requestId).orElse(new RequestFees());
           Double edraa = requestHeader.getWeightInTon()* requestHeader.getPricePerTon() * coalType.getRatioPricePerTon() * rate ;
          Double edraaFee = unloadWay.getCost() ;
@@ -375,6 +377,7 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
           requestFees.setRequestId(requestId);
           requestFees.setTonPrice(requestHeader.getPricePerTon());
+          requestFees.setCurrencyRate(currencyRate);
         double extraCost = 0;
         if(requestHeader.getCategory() == 1){
             rdf = rdfRepository.findByRequestId(requestId).orElse(null);
@@ -414,6 +417,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
                     requestHeader.setPaidStatus(CustomerFeesStatus.PAID.name());
                 }else if(oldOne == CustomerRequestStatus.CustomerPAID && requestStatus == CustomerRequestStatus.ConfirmPaymentEEA){
                     requestHeader.setPaidStatus(CustomerFeesStatus.PaidConfirmed.name());
+                }
+                if(requestStatus == CustomerRequestStatus.AcceptForm && oldOne != CustomerRequestStatus.ConfirmPaymentEEA){
+                    throw new BusinessException("invalid status");
                 }
             }
 

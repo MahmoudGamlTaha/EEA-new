@@ -32,9 +32,9 @@ public abstract class BaseHeaderEntityGen extends BaseEntity implements Serializ
 	@Column(name = "ID")
 	protected Long id;
 
-//	@ManyToOne(fetch = FetchType.LAZY, optional = true)
-//	@JoinColumn(name = "ENTITY_ID", insertable = false, updatable = false)
-//	protected EEAEntity entity;
+    @ManyToOne(fetch = FetchType.EAGER, optional = true)
+	@JoinColumn(name = "ENTITY_ID", insertable = false, updatable = false)
+	protected EEAEntity entity;
 
 	@NotNull
 	@Column(name = "ENTITY_ID")

@@ -27,4 +27,6 @@ public class EEAEntity implements Serializable {
     @NotNull
     @Column(name = "NAME", unique = true)
     private String name;
+    @Column(name = "establish_code")
+    private String establishCode;
 }

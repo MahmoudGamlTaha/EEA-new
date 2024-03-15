@@ -16,15 +16,9 @@ import java.util.Objects;
 public class RequestType extends BaseDetailEntity {
     @Column(name="NAME", nullable = false)
     private String name;
+    @Column(name = "description")
+    private String description;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        RequestType that = (RequestType) o;
-        return name.equals(that.name);
-    }
 
     @Override
     public int hashCode() {
