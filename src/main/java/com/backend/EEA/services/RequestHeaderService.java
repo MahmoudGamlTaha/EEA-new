@@ -3,14 +3,14 @@ package com.backend.EEA.services;
 import com.backend.EEA.business.dao.repositories.masterdat.*;
 import com.backend.EEA.business.dao.specifications.masterdata.RequestHeaderSpecifications;
 import com.backend.EEA.exceptions.BusinessException;
-import com.backend.EEA.mapper.masterdata.FieldErrorMapper;
-import com.backend.EEA.mapper.masterdata.RequestFeesMapper;
-import com.backend.EEA.mapper.masterdata.RequestHeaderTrackingMapper;
+import com.backend.EEA.mapper.masterdata.*;
+import com.backend.EEA.mapper.operation.RequestDetailMapper;
 import com.backend.EEA.mapper.operation.RequestHeaderMapper;
 import com.backend.EEA.model.dto.masterdata.*;
 import com.backend.EEA.model.dto.search.RequestHeaderSearchForm;
 import com.backend.EEA.model.entity.masterdata.*;
 import com.backend.EEA.model.entity.operation.Logger;
+import com.backend.EEA.model.enums.CompanyRequestStatus;
 import com.backend.EEA.model.enums.CustomerFeesStatus;
 import com.backend.EEA.model.enums.CustomerRequestStatus;
 import com.backend.EEA.model.payload.request.AddCommentsToRequestHeaderRequest;
@@ -76,6 +76,28 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     RdfRepository rdfRepository;
     @Autowired
     RequestFeesMapper requestFeesMapper;
+
+    @Autowired
+    RequestTypeRepository requestTypeRepository;
+
+    @Autowired
+    RequestDetailMapper requestDetailMapper;
+
+    @Autowired
+    CompanyDetailMapper companyDetailMapper;
+
+    @Autowired
+    CompanyContactMapper companyContactMapper;
+
+    @Autowired
+    CompanyContactRepository companyContactRepository;
+
+    @Autowired
+    CompanyDetailRepository companyDetailRepository;
+
+    @Autowired
+    private AttachmentMapper attachmentMapper;
+
 
     public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper) {
         super(requestHeaderRepository);
@@ -600,5 +622,75 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
           commentRepository.save(comment);
       }
       return requestHeaderMapper.toRequestHeaderDto(requestHeader);
+  }
+
+  public RequestHeaderDto generateEnvironmentReport(RequestHeaderDto requestHeaderDto,Long companyId,Long requestId){
+
+        // validate company type and id
+        Company company=companyRepository.findById(companyId).orElseThrow(()->new BusinessException
+                ("Company Id is not founded"));
+        if(company.getStatus() != CompanyRequestStatus.Activated)
+            throw new BusinessException("Company is not activate");
+
+      // validate request type and id
+        RequestType requestType=requestTypeRepository.findById(requestId).orElseThrow
+                (()->new BusinessException("Request type id is not founded"));
+        if(!requestType.getCode().equals("RW"))
+            throw new BusinessException("Request Type is not valid");
+
+        requestHeaderDto.setRequestTypeId(requestId);
+        RequestHeader requestHeader=requestHeaderMapper.toRequestHeaderDto(requestHeaderDto);
+        requestHeader.setCompanyId(companyId);
+        //save request
+      requestHeaderRepository.save(requestHeader);
+
+      //save request detail
+      List<RequestDetail> requestDetails=requestDetailMapper.toListOfRequestDetail(requestHeaderDto.getRequestDetail());
+      requestDetails.stream().forEach(r->{
+          r.setRequestHeaderId(requestHeader.getId());
+          r.setEntityId(getEntityId());
+          r.setLastUpdateDate(new Date());
+          r.setChangerId(getLoggedInUserId());
+      });
+      requestDetailRepository.saveAll(requestDetails);
+
+
+      //save company detail
+      List<CompanyDetail> companyDetails=companyDetailMapper.toListOfEntity(requestHeaderDto.getCompany().getCompanyDetails());
+      companyDetails.stream().forEach(d->{
+          d.setCompanyId(companyId);
+          d.setEntityId(getEntityId());
+          d.setLastUpdateDate(new Date());
+          d.setChangerId(getLoggedInUserId());
+      });
+      companyDetailRepository.saveAll(companyDetails);
+
+
+      //save company contact
+      List<CompanyContact> companyContacts=companyContactMapper.toListOfEntity(requestHeaderDto.getCompany().getCompanyContacts());
+      companyContacts.stream().forEach(c->{
+          c.setCompanyId(companyId);
+          c.setLastUpdateDate(new Date());
+          c.setEntityId(getEntityId());
+          c.setChangerId(getLoggedInUserId());
+      });
+      companyContactRepository.saveAll(companyContacts);
+
+
+      // save attachment
+      List<Attachment>  attachments=new ArrayList<>();
+      companyDetails.stream().forEach(c->{
+          c.getAttachment().forEach(a->{
+              a.setCompanyDetailId(c.getId());
+              a.setEntityId(getEntityId());
+              a.setLastUpdateDate(new Date());
+              a.setChangerId(getLoggedInUserId());
+              attachments.add(a);
+          });
+      });
+      attachmentRepository.saveAll(attachments);
+
+        return requestHeaderDto;
+
   }
 }

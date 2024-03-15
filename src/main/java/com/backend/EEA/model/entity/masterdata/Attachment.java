@@ -82,4 +82,11 @@ public class Attachment extends BaseHeaderEntityGen {
 
     @Column(name = "company_activate_id")
     private Long companyActivateId;
+
+    @ManyToOne
+    @JoinColumn(name = "company_detail_id",updatable = false,insertable = false)
+    private CompanyDetail companyDetail;
+
+    @Column(name = "company_detail_id")
+    private Long companyDetailId;
 }

@@ -2,6 +2,8 @@ package com.backend.EEA.model.dto.masterdata;
 
 import com.backend.EEA.common.config.serialize.JsonDateDeserializer;
 import com.backend.EEA.common.config.serialize.JsonDateSerializer;
+import com.backend.EEA.model.entity.masterdata.CompanyContact;
+import com.backend.EEA.model.entity.masterdata.CompanyDetail;
 import com.backend.EEA.model.enums.CompanyRequestStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +14,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
+import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -83,5 +88,9 @@ public class CompanyDto {
     private Long ownerId;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private CompanyRequestStatus status;
+
+    List<CompanyContactDto> companyContacts;
+
+    List<CompanyDetailDto> companyDetails;
 
 }

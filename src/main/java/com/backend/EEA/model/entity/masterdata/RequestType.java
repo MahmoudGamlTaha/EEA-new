@@ -17,6 +17,8 @@ public class RequestType extends BaseDetailEntity {
     @Column(name="NAME", nullable = false)
     private String name;
 
+    private String code;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

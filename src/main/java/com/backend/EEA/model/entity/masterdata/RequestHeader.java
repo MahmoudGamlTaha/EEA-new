@@ -65,6 +65,10 @@ public class RequestHeader extends BaseHeaderEntityGen {
     private Long companyId;
 
     @ManyToOne
+    @JoinColumn(name = "company_id",insertable = false,updatable = false)
+    private Company company;
+
+    @ManyToOne
     @JoinColumn(name = "source_country_id", insertable = false, updatable = false)
     private Country sourceCountry;
 

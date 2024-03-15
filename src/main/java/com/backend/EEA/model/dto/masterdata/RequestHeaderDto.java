@@ -113,4 +113,6 @@ public class RequestHeaderDto {
     private Date createdDate;
 
     private int category;
+
+    private CompanyDto company;
 }

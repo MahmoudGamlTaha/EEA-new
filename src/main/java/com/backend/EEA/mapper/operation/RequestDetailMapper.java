@@ -12,12 +12,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {AttachmentMapper.class, ActivityMapper.class})
 public interface RequestDetailMapper {
    @Mapping(source = "companyActivity", target = "companyActivity")
    RequestDetail toRequestDetail(RequestDetailDto requestDetailDto);
 
    RequestDetailDto toRequestHeaderDto(RequestDetail requestHeader);
+
+   List<RequestDetail> toListOfRequestDetail(List<RequestDetailDto> requestDetailDtos);
    @AfterMapping
    default public void calledWithSourceAndTarget(RequestDetailDto anySource, @MappingTarget RequestDetail target) {
       target.setEntityId(1L);

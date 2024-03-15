@@ -15,6 +15,13 @@ public interface RequestHeaderMapper {
    @Mapping(source = "notes", target = "description")
    @Mapping(source = "unLoadWayId", target = "unloadWayId")
    RequestHeader toRequestHeader(RequestHeaderDto requestHeaderDto);
+
+   @Mapping(source = "requestTypeId",target = "type")
+   @Mapping(source = "notes", target = "description")
+   @Mapping(source = "unLoadWayId", target = "unloadWayId")
+   @Mapping(target = "requestDetail",ignore = true)
+   @Mapping(target = "company",ignore = true)
+   RequestHeader toRequestHeaderDto(RequestHeaderDto requestHeaderDto);
    @Mapping(source = "type", target = "requestTypeId")
    @Mapping(source = "description", target = "notes")
    @Mapping(source = "administrativeForwardTo", target = "administrativeForwardTo")

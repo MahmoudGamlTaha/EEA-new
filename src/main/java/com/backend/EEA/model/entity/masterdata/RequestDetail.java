@@ -55,4 +55,13 @@ public class RequestDetail extends BaseHeaderEntityGen {
     private Date acceptDate;
     @OneToMany(mappedBy = "requestDetail")
     private Set<Attachment> otherAttachment;
+
+
+    // Environmental performance report
+
+    @Column(name = "from_date")
+    private Date fromDate;
+
+    @Column(name = "to_date")
+    private Date toDate;
 }
