@@ -624,6 +624,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
       return requestHeaderMapper.toRequestHeaderDto(requestHeader);
   }
 
+    /**
+     * @implNote generate environment report
+     */
   public RequestHeaderDto generateEnvironmentReport(RequestHeaderDto requestHeaderDto,Long companyId,Long requestId){
 
         // validate company type and id

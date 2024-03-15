@@ -36,6 +36,9 @@ return null;
         return buildResponseEntity(true, "success",dto, HttpStatus.OK);
     }
 
+    /**
+     * @apiNote this api for create environment report feature
+     */
     @RequestMapping(value = "/add-environment-report/{companyId}/{requestId}",method = RequestMethod.POST)
     public ResponseEntity<ResponsePojo> generateEnvironmentReport( @PathVariable Long companyId,@PathVariable Long requestId,@RequestBody RequestHeaderDto requestHeaderDto) throws Exception {
         return buildResponseEntity(true,"success",
