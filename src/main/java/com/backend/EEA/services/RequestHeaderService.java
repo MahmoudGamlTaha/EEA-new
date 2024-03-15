@@ -75,6 +75,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     @Autowired
     RequestFeesMapper requestFeesMapper;
 
+    @Autowired
+    private   CompanyService companyService;
+
     public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper) {
         super(requestHeaderRepository);
         this.requestHeaderRepository = requestHeaderRepository;
@@ -598,6 +601,18 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
         requestStatusList.add(new RequestStatusTrackingDto(11L, false , null, null));
         requestStatusList.add(new RequestStatusTrackingDto(12L, false , null, null));
         return  requestStatusList;
+    }
+
+    public RequestHeaderModelDto getRequestModel(Long id){
+        Optional<RequestHeader> requestHeader=requestHeaderRepository.findById(id);
+        if(requestHeader.isPresent() && requestHeader.get().getStatus().equals(CustomerRequestStatus.ConfirmPaymentEEA)){
+            CompanyDto dto=companyService.findOne(requestHeader.get().getCompanyId());
+            RequestHeaderModelDto requestHeaderModelDto=requestHeaderMapper.toRequestModel(requestHeader.get());
+            requestHeaderModelDto.setCompanyDto(dto);
+            return requestHeaderModelDto;
+        }
+        else
+            throw new BusinessException("request is not confirmed");
     }
 
 

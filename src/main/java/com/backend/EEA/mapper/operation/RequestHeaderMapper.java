@@ -2,6 +2,7 @@ package com.backend.EEA.mapper.operation;
 
 import com.backend.EEA.mapper.masterdata.*;
 import com.backend.EEA.model.dto.masterdata.RequestHeaderDto;
+import com.backend.EEA.model.dto.masterdata.RequestHeaderModelDto;
 import com.backend.EEA.model.entity.masterdata.RequestHeader;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -20,6 +21,8 @@ public interface RequestHeaderMapper {
    @Mapping(source = "administrativeForwardTo", target = "administrativeForwardTo")
    @Mapping(source = "unloadWayId", target = "unLoadWayId")
    RequestHeaderDto toRequestHeaderDto(RequestHeader requestHeader);
+
+   RequestHeaderModelDto toRequestModel(RequestHeader requestHeader);
 
    @AfterMapping
    default public void calledWithSourceAndTarget(RequestHeaderDto anySource, @MappingTarget RequestHeader target) {

@@ -69,5 +69,10 @@ public class CompanyController extends BaseRestController<Company, CompanyDto, C
 
     }
 
+    @GetMapping("/get-by-activity/{id}")
+    public ResponseEntity<List<CompanyDto>> getCompaniesByActivityId(@PathVariable Long id){
+         return ResponseEntity.ok(companyService.getCompaniesByActivityId(id));
+    }
+
 
 }
