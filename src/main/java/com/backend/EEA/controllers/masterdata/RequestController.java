@@ -73,7 +73,8 @@ public class RequestController extends BaseRestController<RequestHeader, Request
     }
 
     @GetMapping("/request-model/{id}")
-    public ResponseEntity<RequestHeaderModelDto> getRequestModel(@PathVariable Long id){
-        return ResponseEntity.ok(requestHeaderService.getRequestModel(id));
+    public ResponseEntity<ResponsePojo> getRequestModel(@PathVariable Long id){
+        RequestHeaderModelDto requestHeaderModelDto = requestHeaderService.getRequestModel(id);
+        return buildResponseEntity(true, "success", requestHeaderModelDto, HttpStatus.OK);
     }
 }

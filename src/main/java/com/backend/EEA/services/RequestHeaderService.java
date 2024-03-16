@@ -605,9 +605,11 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
     public RequestHeaderModelDto getRequestModel(Long id){
         Optional<RequestHeader> requestHeader=requestHeaderRepository.findById(id);
-        if(requestHeader.isPresent() && requestHeader.get().getStatus().equals(CustomerRequestStatus.ConfirmPaymentEEA)){
+        if(requestHeader.isPresent() && requestHeader.get().getStatus().equals(CustomerRequestStatus.AcceptForm)){
             CompanyDto dto=companyService.findOne(requestHeader.get().getCompanyId());
-            RequestHeaderModelDto requestHeaderModelDto=requestHeaderMapper.toRequestModel(requestHeader.get());
+            CoalType coalType = coalTypeRepository.findById( requestHeader.get().getCoalTypeId()).orElse(null);
+            UnloadWay unloadWay = unloadWayRepository.findById(requestHeader.get().getUnloadWayId()).orElse(null);
+            RequestHeaderModelDto requestHeaderModelDto=requestHeaderMapper.toRequestModel(requestHeader.get(), coalType, unloadWay);
             requestHeaderModelDto.setCompanyDto(dto);
             return requestHeaderModelDto;
         }
