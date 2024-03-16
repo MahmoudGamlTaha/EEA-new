@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +71,18 @@ public class RequestController extends BaseRestController<RequestHeader, Request
     public ResponseEntity<ResponsePojo> calculateCharge(@RequestParam(value = "requestId") Long requestId, @RequestParam(value = "currencyRate") Double currencyRate){
          RequestFeesDto requestFeesDto = this.requestHeaderService.calculateCharge(requestId, currencyRate);
          return buildResponseEntity(true, "success", requestFeesDto,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/request-change-harbor",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> createRequestToChangeHarbor(@Valid @RequestBody RequestToChangeHarborDto dto){
+        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,4L);
+        return buildResponseEntity(true,"success",null,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/request-complete-quantity",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> createRequestToCompleteQuantity(@Valid @RequestBody RequestToChangeHarborDto dto){
+        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,5L);
+        return buildResponseEntity(true,"success",null,HttpStatus.OK);
     }
 
 }

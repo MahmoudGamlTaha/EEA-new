@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Table(name = "Request_detail")
@@ -55,4 +56,16 @@ public class RequestDetail extends BaseHeaderEntityGen {
     private Date acceptDate;
     @OneToMany(mappedBy = "requestDetail")
     private Set<Attachment> otherAttachment;
+
+    @ManyToMany(mappedBy = "requestDetails")
+    private List<Harbor> harbors;
+
+    @Column(name = "quantities_to_be_completed")
+    private Integer quantitiesToBeCompleted;
+
+    @Column(name = "exported_quantities")
+    private Integer exportedQuantities;
+
+    @Column(name = "reasons_for_not_completing_the_quantity")
+    private String reasonsForNotCompletingTheQuantity;
 }

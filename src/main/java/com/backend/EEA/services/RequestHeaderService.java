@@ -3,9 +3,11 @@ package com.backend.EEA.services;
 import com.backend.EEA.business.dao.repositories.masterdat.*;
 import com.backend.EEA.business.dao.specifications.masterdata.RequestHeaderSpecifications;
 import com.backend.EEA.exceptions.BusinessException;
+import com.backend.EEA.mapper.masterdata.AttachmentMapper;
 import com.backend.EEA.mapper.masterdata.FieldErrorMapper;
 import com.backend.EEA.mapper.masterdata.RequestFeesMapper;
 import com.backend.EEA.mapper.masterdata.RequestHeaderTrackingMapper;
+import com.backend.EEA.mapper.operation.RequestDetailMapper;
 import com.backend.EEA.mapper.operation.RequestHeaderMapper;
 import com.backend.EEA.model.dto.masterdata.*;
 import com.backend.EEA.model.dto.search.RequestHeaderSearchForm;
@@ -20,13 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
 public class RequestHeaderService extends BaseService<RequestHeader, RequestHeaderDto, RequestHeaderSearchForm> {
+
 
     RequestHeaderRepository requestHeaderRepository;
     RequestHeaderMapper requestHeaderMapper;
@@ -77,10 +81,22 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     @Autowired
     RequestFeesMapper requestFeesMapper;
 
-    public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper) {
+    @Autowired
+    AttachmentMapper attachmentMapper;
+
+    @Autowired
+    AttachmentService attachmentService;
+
+   private final HarborRepository harborRepository;
+
+    @Autowired
+    RequestDetailMapper requestDetailMapper;
+
+    public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper, HarborRepository harborRepository) {
         super(requestHeaderRepository);
         this.requestHeaderRepository = requestHeaderRepository;
         this.requestHeaderMapper = requestHeaderMapper;
+        this.harborRepository = harborRepository;
     }
 
 
@@ -600,5 +616,55 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
           commentRepository.save(comment);
       }
       return requestHeaderMapper.toRequestHeaderDto(requestHeader);
+  }
+
+    /**
+     * @implNote create request to change harbor or request to complete the quantity
+     */
+  @Transactional
+  public void createRequestToChangeHarborOrCompleteQuantity(RequestToChangeHarborDto request,Long requestTypeId){
+
+        // create request header
+     RequestHeader header=new RequestHeader();
+     header.setRequesterId(requestTypeId);
+     header.setChangerId(getLoggedInUserId());
+     header.setLastUpdateDate(new Date());
+     header.setEntityId(getEntityId());
+     requestHeaderRepository.save(header);
+
+     // create request detail
+     RequestDetail requestDetail=requestDetailMapper.fromRequestToChangeHarborToEntity(request);
+     requestDetail.setChangerId(getLoggedInUserId());
+     requestDetail.setEntityId(getEntityId());
+     requestDetail.setRequestHeaderId(header.getId());
+     requestDetail.setLastUpdateDate(new Date());
+     requestDetailRepository.save(requestDetail);
+
+     // create attachment
+     request.getOtherAttachment().stream().forEach(a->{
+         a.setRequestHeaderId(header.getId());
+         a.setRequestDetailId(requestDetail.getId());
+         a.setType(a.getAttachmentType().getRequestType());
+         try {
+             attachmentService.createEntity(a);
+         } catch (Exception e) {
+             throw new RuntimeException(e);
+         }
+     });
+
+     // modify harbor with request detail
+      List<Harbor> harbors = harborRepository.findByIdIn(request.getHarborIds());
+      if (!CollectionUtils.isEmpty(harbors)) {
+          harbors.forEach(h -> {
+              List<RequestDetail> existingRequestDetails = new ArrayList<>(h.getRequestDetails());
+              if (!CollectionUtils.isEmpty(existingRequestDetails)) {
+                  existingRequestDetails.add(requestDetail);
+              } else {
+                  existingRequestDetails = Collections.singletonList(requestDetail);
+              }
+              h.setRequestDetails(existingRequestDetails);
+              harborRepository.save(h);
+          });
+      }
   }
 }
