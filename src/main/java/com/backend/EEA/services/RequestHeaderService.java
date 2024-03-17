@@ -144,10 +144,10 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
             throw new BusinessException("company not found");
         }
         Long activity = company.getActivity_id();
-        entity.setCategory(0);
+        entity.setCategory(1);
         if(!company.getActivity().getCode().equals("RDF-Cement")){
             activity = 0L;
-            entity.setCategory(1);
+            entity.setCategory(0);
         }
       CompanyRequestConfig companyRequestConfig = this.companyRequestConfigRepository.
                                 findByCompanyActivityIdAndRequestTypeId(activity, entity.getType());
@@ -605,17 +605,19 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
     public RequestHeaderModelDto getRequestModel(Long id){
         Optional<RequestHeader> requestHeader=requestHeaderRepository.findById(id);
-        if(requestHeader.isPresent() && requestHeader.get().getStatus().equals(CustomerRequestStatus.AcceptForm)){
+     //   if(requestHeader.isPresent() && requestHeader.get().getStatus().equals(CustomerRequestStatus.AcceptForm)){
             CompanyDto dto=companyService.findOne(requestHeader.get().getCompanyId());
             CoalType coalType = coalTypeRepository.findById( requestHeader.get().getCoalTypeId()).orElse(null);
             UnloadWay unloadWay = unloadWayRepository.findById(requestHeader.get().getUnloadWayId()).orElse(null);
             RequestHeaderModelDto requestHeaderModelDto=requestHeaderMapper.toRequestModel(requestHeader.get(), coalType, unloadWay);
             requestHeaderModelDto.setCompanyDto(dto);
             return requestHeaderModelDto;
-        }
-        else
-            throw new BusinessException("request is not confirmed");
+       // }
+       // else
+         //   throw new BusinessException("request is not confirmed");
     }
-
+     public RequestHeaderDto addCommentsToRequest(Long requestId, List<CommentsDto> commentsDtos){
+       return null;
+    }
 
 }

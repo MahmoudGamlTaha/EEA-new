@@ -4,7 +4,9 @@ import com.backend.EEA.controllers.BaseRestController;
 import com.backend.EEA.model.dto.masterdata.UserDto;
 import com.backend.EEA.model.dto.search.UserSearchForm;
 import com.backend.EEA.model.entity.masterdata.User;
+import com.backend.EEA.model.pojos.ResponsePojo;
 import com.backend.EEA.services.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,5 +16,8 @@ public class UserController extends BaseRestController<User, UserDto, UserSearch
 
     public UserController(UserService userService) {
         super(userService);
+    }
+    public ResponseEntity<ResponsePojo> findUsersByAdministrative(Long administrativeId){
+        return null;
     }
 }
