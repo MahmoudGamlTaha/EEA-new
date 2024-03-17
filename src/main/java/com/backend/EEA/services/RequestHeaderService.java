@@ -635,22 +635,17 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
         if(company.getStatus() != CompanyRequestStatus.Activated)
             throw new BusinessException("Company is not activate");
 
-      // validate request type and id
-        RequestType requestType=requestTypeRepository.findById(requestId).orElseThrow
-                (()->new BusinessException("Request type id is not founded"));
-        if(!requestType.getCode().equals("RW"))
-            throw new BusinessException("Request Type is not valid");
 
-        requestHeaderDto.setRequestTypeId(requestId);
-        RequestHeader requestHeader=requestHeaderMapper.toRequestHeaderDto(requestHeaderDto);
-        requestHeader.setCompanyId(companyId);
-        //save request
-      requestHeaderRepository.save(requestHeader);
+        // update request header
+        RequestHeader header=requestHeaderRepository.findById(requestId).
+                orElseThrow(()->new BusinessException("Request type id is not founded"));
+      header.setCompanyId(companyId);
+      requestHeaderRepository.save(header);
 
       //save request detail
       List<RequestDetail> requestDetails=requestDetailMapper.toListOfRequestDetail(requestHeaderDto.getRequestDetail());
       requestDetails.stream().forEach(r->{
-          r.setRequestHeaderId(requestHeader.getId());
+          r.setRequestHeaderId(requestId);
           r.setEntityId(getEntityId());
           r.setLastUpdateDate(new Date());
           r.setChangerId(getLoggedInUserId());
