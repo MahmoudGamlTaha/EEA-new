@@ -1,6 +1,7 @@
 package com.backend.EEA.model.entity.masterdata;
 
 import com.backend.EEA.model.entity.BaseHeaderEntityGen;
+import com.backend.EEA.model.enums.OperatingTimePerCycle;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -68,4 +69,55 @@ public class RequestDetail extends BaseHeaderEntityGen {
 
     @Column(name = "reasons_for_not_completing_the_quantity")
     private String reasonsForNotCompletingTheQuantity;
+
+    //Request approval of the developed form
+    @Column(name = "developer_name")
+    private String developerName;
+
+    @Column(name = "describe_it")
+    private String describeIt;
+
+    @Column(name = "Title_of_the_developed_model")
+    private String titleOfTheDevelopedModel;
+
+    @ManyToOne
+    @JoinColumn(name = "government_id",insertable = false,updatable = false)
+    private Government government;
+
+    @Column(name = "government_id")
+    private Long governmentId;
+
+    @Column(name = "name_of_the_developed_model")
+    private String nameOfTheDevelopedModel;
+
+
+    @Column(name = "location_of_the_required_form_to_be_approved")
+    private String locationOfTheRequiredFormToBeApproved;
+
+    @Column(name = "the_coordinates_x")
+    private Integer theCoordinatesX;
+
+    @Column(name = "the_coordinates_y")
+    private Integer theCoordinatesY;
+
+    @Column(name = "explain_how_to_operate")
+    private String explainHowToOperate;
+
+    @Column(name = "quantity_of_wood_produced")
+    private Integer quantityOfWoodProduced;
+
+    @Column(name = "quantity_of_charcoal_produced")
+    private Integer quantityOfCharcoalProduced;
+
+    @Column(name = "operating_time_per_cycle")
+    private Integer operatingTimePerCycle;
+
+    @Column(name = "monthly_production")
+    private Integer monthlyProduction;
+
+    @Column(name = "disposal_of_hazardous_waste")
+    private String disposalOfHazardousWaste;
+
+    @Column(name = "time_per_cycle")
+    private OperatingTimePerCycle timePerCycle;
 }

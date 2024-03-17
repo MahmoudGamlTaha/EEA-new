@@ -622,11 +622,15 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
      * @implNote create request to change harbor or request to complete the quantity
      */
   @Transactional
-  public void createRequestToChangeHarborOrCompleteQuantity(RequestToChangeHarborDto request,Long requestId){
+  public void createRequestToChangeHarborOrCompleteQuantity(RequestToChangeHarborDto request,Long requestId,Long requestTypeId){
 
         // get request header
      RequestHeader header=requestHeaderRepository.findById(requestId).orElseThrow(()->new
              BusinessException("Request Header is not found"));
+
+     // validate request type
+      if(!Objects.equals(requestTypeId, header.getType()))
+          throw new BusinessException("request in not valid");
 
      // create request detail
      RequestDetail requestDetail=requestDetailMapper.fromRequestToChangeHarborToEntity(request);
@@ -662,5 +666,38 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
               harborRepository.save(h);
           });
       }
+  }
+
+  public void requestApprovalOfTheDevelopedForm(RequestDetailDto requestDetailDto,Long requestId){
+      // get request header
+      RequestHeader header=requestHeaderRepository.findById(requestId).orElseThrow(()->new
+              BusinessException("Request Header is not found"));
+
+
+      // validate request type
+      if(header.getType() != 6L )
+          throw new BusinessException("request in not valid");
+
+      // create request detail
+      RequestDetail requestDetail=requestDetailMapper.toRequestDetail(requestDetailDto);
+      requestDetail.setCreatedDate(new Date());
+      requestDetail.setChangerId(getLoggedInUserId());
+      requestDetail.setEntityId(getEntityId());
+      requestDetail.setLastUpdateDate(new Date());
+      requestDetail.setRequestHeaderId(requestId);
+      requestDetailRepository.save(requestDetail);
+
+      requestDetailDto.getOtherAttachment().stream().forEach(a->{
+          a.setRequestHeaderId(header.getId());
+          a.setRequestDetailId(requestDetail.getId());
+          a.setType(a.getAttachmentType().getRequestType());
+          try {
+              attachmentService.createEntity(a);
+          } catch (Exception e) {
+              throw new RuntimeException(e);
+          }
+      });
+
+
   }
 }

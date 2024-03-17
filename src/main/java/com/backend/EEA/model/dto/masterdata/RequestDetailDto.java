@@ -3,6 +3,8 @@ package com.backend.EEA.model.dto.masterdata;
 import com.backend.EEA.model.entity.masterdata.Attachment;
 import com.backend.EEA.model.entity.masterdata.Company;
 import com.backend.EEA.model.entity.masterdata.CompanyActivity;
+import com.backend.EEA.model.entity.masterdata.Government;
+import com.backend.EEA.model.enums.OperatingTimePerCycle;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -10,6 +12,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.NumberFormat;
 
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.Date;
 import java.util.List;
 
@@ -39,4 +44,35 @@ public class RequestDetailDto {
  private AttachmentDto companyAcceptance;
 
  private Date acceptDate;
+
+ //Request approval of the developed form
+ private String developerName;
+
+ private String describeIt;
+
+ private String titleOfTheDevelopedModel;
+
+ private Long governmentId;
+
+ private String nameOfTheDevelopedModel;
+
+ private String locationOfTheRequiredFormToBeApproved;
+
+ private Integer theCoordinatesX;
+
+ private Integer theCoordinatesY;
+
+ private String explainHowToOperate;
+
+ private Integer quantityOfWoodProduced;
+
+ private Integer quantityOfCharcoalProduced;
+
+ private Integer operatingTimePerCycle;
+
+ private Integer monthlyProduction;
+
+ private String disposalOfHazardousWaste;
+
+ private OperatingTimePerCycle timePerCycle;
 }
