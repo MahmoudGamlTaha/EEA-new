@@ -622,15 +622,11 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
      * @implNote create request to change harbor or request to complete the quantity
      */
   @Transactional
-  public void createRequestToChangeHarborOrCompleteQuantity(RequestToChangeHarborDto request,Long requestTypeId){
+  public void createRequestToChangeHarborOrCompleteQuantity(RequestToChangeHarborDto request,Long requestId){
 
-        // create request header
-     RequestHeader header=new RequestHeader();
-     header.setRequesterId(requestTypeId);
-     header.setChangerId(getLoggedInUserId());
-     header.setLastUpdateDate(new Date());
-     header.setEntityId(getEntityId());
-     requestHeaderRepository.save(header);
+        // get request header
+     RequestHeader header=requestHeaderRepository.findById(requestId).orElseThrow(()->new
+             BusinessException("Request Header is not found"));
 
      // create request detail
      RequestDetail requestDetail=requestDetailMapper.fromRequestToChangeHarborToEntity(request);
