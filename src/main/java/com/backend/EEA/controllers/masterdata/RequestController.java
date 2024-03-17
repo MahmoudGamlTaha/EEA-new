@@ -73,15 +73,15 @@ public class RequestController extends BaseRestController<RequestHeader, Request
          return buildResponseEntity(true, "success", requestFeesDto,HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/request-change-harbor",method = RequestMethod.POST)
-    public ResponseEntity<ResponsePojo> createRequestToChangeHarbor(@Valid @RequestBody RequestToChangeHarborDto dto){
-        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,4L);
+    @RequestMapping(value = "/request-change-harbor/{requestId}",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> createRequestToChangeHarbor(@Valid @RequestBody RequestToChangeHarborDto dto,@PathVariable Long requestId){
+        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,requestId);
         return buildResponseEntity(true,"success",null,HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/request-complete-quantity",method = RequestMethod.POST)
-    public ResponseEntity<ResponsePojo> createRequestToCompleteQuantity(@Valid @RequestBody RequestToChangeHarborDto dto){
-        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,5L);
+    @RequestMapping(value = "/request-complete-quantity/{requestId}",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> createRequestToCompleteQuantity(@Valid @RequestBody RequestToChangeHarborDto dto,@PathVariable Long requestId){
+        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,requestId);
         return buildResponseEntity(true,"success",null,HttpStatus.OK);
     }
 
