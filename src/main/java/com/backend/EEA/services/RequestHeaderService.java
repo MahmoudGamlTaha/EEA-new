@@ -15,7 +15,9 @@ import com.backend.EEA.model.entity.masterdata.*;
 import com.backend.EEA.model.entity.operation.Logger;
 import com.backend.EEA.model.enums.CustomerFeesStatus;
 import com.backend.EEA.model.enums.CustomerRequestStatus;
+
 import com.backend.EEA.model.payload.request.AddCommentsToRequestHeaderRequest;
+import com.backend.EEA.model.pojos.SortPojo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +93,8 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
     @Autowired
     RequestDetailMapper requestDetailMapper;
-
+     @Autowired
+    private   CompanyService companyService;
     public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper, HarborRepository harborRepository) {
         super(requestHeaderRepository);
         this.requestHeaderRepository = requestHeaderRepository;
@@ -103,6 +106,10 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     @Override
     protected Specification<RequestHeader> buildSpecification(RequestHeaderSearchForm requestHeaderSearchForm) {
         UserSessionDto userSessionDto = getLoggedInUserSession();
+        SortPojo sortPojo = new SortPojo();
+        sortPojo.setSortDirection("desc");
+        sortPojo.setFieldName("id");
+        requestHeaderSearchForm.setSortPojo(sortPojo);
         if(userSessionDto.getAuthorities().contains(new SimpleGrantedAuthority("customer")))
               requestHeaderSearchForm.setRequesterId(userSessionDto.getId());
         else if(userSessionDto.getAuthorities().contains(new SimpleGrantedAuthority("user"))||
@@ -379,7 +386,11 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
           UnloadWay unloadWay = unloadWayRepository.findById(requestHeader.getUnloadWayId()).orElse(null);
           Rdf rdf = null;
-
+         CurrencyRate currencyRate = new CurrencyRate();
+         currencyRate.setEntityId(1L);
+         currencyRate.setCurrencyId(requestHeader.getCurrencyId());
+         currencyRate.setRate(rate);
+         currencyRate.setDate(new Date());
         RequestFees requestFees = this.requestFeesRepository.findByRequestId(requestId).orElse(new RequestFees());
           Double edraa = requestHeader.getWeightInTon()* requestHeader.getPricePerTon() * coalType.getRatioPricePerTon() * rate ;
          Double edraaFee = unloadWay.getCost() ;
@@ -387,6 +398,7 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
           requestFees.setRequestId(requestId);
           requestFees.setTonPrice(requestHeader.getPricePerTon());
+          requestFees.setCurrencyRate(currencyRate);
         double extraCost = 0;
         if(requestHeader.getCategory() == 1){
             rdf = rdfRepository.findByRequestId(requestId).orElse(null);
@@ -426,6 +438,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
                     requestHeader.setPaidStatus(CustomerFeesStatus.PAID.name());
                 }else if(oldOne == CustomerRequestStatus.CustomerPAID && requestStatus == CustomerRequestStatus.ConfirmPaymentEEA){
                     requestHeader.setPaidStatus(CustomerFeesStatus.PaidConfirmed.name());
+                }
+                if(requestStatus == CustomerRequestStatus.AcceptForm && oldOne != CustomerRequestStatus.ConfirmPaymentEEA){
+                    throw new BusinessException("invalid status");
                 }
             }
 
@@ -604,6 +619,20 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
         requestStatusList.add(new RequestStatusTrackingDto(11L, false , null, null));
         requestStatusList.add(new RequestStatusTrackingDto(12L, false , null, null));
         return  requestStatusList;
+    }
+
+    public RequestHeaderModelDto getRequestModel(Long id){
+        Optional<RequestHeader> requestHeader=requestHeaderRepository.findById(id);
+        if(requestHeader.isPresent() && requestHeader.get().getStatus().equals(CustomerRequestStatus.AcceptForm)){
+            CompanyDto dto=companyService.findOne(requestHeader.get().getCompanyId());
+            CoalType coalType = coalTypeRepository.findById( requestHeader.get().getCoalTypeId()).orElse(null);
+            UnloadWay unloadWay = unloadWayRepository.findById(requestHeader.get().getUnloadWayId()).orElse(null);
+            RequestHeaderModelDto requestHeaderModelDto=requestHeaderMapper.toRequestModel(requestHeader.get(), coalType, unloadWay);
+            requestHeaderModelDto.setCompanyDto(dto);
+            return requestHeaderModelDto;
+        }
+        else
+            throw new BusinessException("request is not confirmed");
     }
 
 

@@ -131,4 +131,9 @@ public class CompanyService extends BaseService<Company, CompanyDto, CompanySear
         this.attachmentRepository.saveAll(attachments);
     }
 
+    public List<CompanyDto> getCompaniesByActivityId(Long id){
+        List<Company>  companyDtoList=companyRepository.findByActivityId(id);
+        return companyDtoList != null ? mapDataListToDtoList(companyDtoList) : null;
+    }
+
 }

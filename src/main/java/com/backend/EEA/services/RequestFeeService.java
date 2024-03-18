@@ -1,7 +1,9 @@
 package com.backend.EEA.services;
 
+import com.backend.EEA.business.dao.repositories.masterdat.CompanyRepository;
 import com.backend.EEA.business.dao.repositories.masterdat.HarborRepository;
 import com.backend.EEA.business.dao.repositories.masterdat.RequestFeesRepository;
+import com.backend.EEA.business.dao.repositories.masterdat.RequestHeaderRepository;
 import com.backend.EEA.business.dao.specifications.masterdata.HarborSpecifications;
 import com.backend.EEA.business.dao.specifications.masterdata.RequestFeeSpecifications;
 import com.backend.EEA.exceptions.BusinessException;
@@ -9,10 +11,13 @@ import com.backend.EEA.mapper.masterdata.HarborMapper;
 import com.backend.EEA.mapper.masterdata.RequestFeesMapper;
 import com.backend.EEA.model.dto.masterdata.HarborDto;
 import com.backend.EEA.model.dto.masterdata.RequestFeesDto;
+import com.backend.EEA.model.dto.masterdata.RequestFeesInvoiceDto;
 import com.backend.EEA.model.dto.search.HarborSearchForm;
 import com.backend.EEA.model.dto.search.RequestFeeSearchForm;
+import com.backend.EEA.model.entity.masterdata.Company;
 import com.backend.EEA.model.entity.masterdata.Harbor;
 import com.backend.EEA.model.entity.masterdata.RequestFees;
+import com.backend.EEA.model.entity.masterdata.RequestHeader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -25,10 +30,16 @@ public class RequestFeeService extends BaseService<RequestFees, RequestFeesDto, 
 
     RequestFeesRepository requestFeesRepository;
     RequestFeesMapper requestFeesMapper;
-    public RequestFeeService(RequestFeesRepository harborRepository, RequestFeesMapper requestFeesMapper) {
+    RequestHeaderRepository requestHeaderRepository;
+
+    CompanyRepository companyRepository;
+    public RequestFeeService(RequestFeesRepository harborRepository, RequestFeesMapper requestFeesMapper,
+                             RequestHeaderRepository requestHeaderRepository,  CompanyRepository companyRepository) {
         super(harborRepository);
         this.requestFeesRepository = harborRepository;
         this.requestFeesMapper = requestFeesMapper;
+        this.requestHeaderRepository = requestHeaderRepository;
+        this.companyRepository =companyRepository;
     }
 
     @Override
@@ -74,5 +85,14 @@ public class RequestFeeService extends BaseService<RequestFees, RequestFeesDto, 
     }
     protected void doBeforeEdit(RequestFees entity) throws BusinessException {
 
+    }
+    public RequestFeesInvoiceDto getRequestInvoice(Long requestId){
+        //check authurity of request
+        RequestFees requestFees = this.findFeesByRequestId(requestId);
+        RequestHeader requestHeader = this.requestHeaderRepository.findById(requestId).orElse(null);
+        if(requestFees == null || requestHeader == null)
+            throw new BusinessException("error generate invoice");
+        Company company = this.companyRepository.findById(requestHeader.getCompanyId()).orElse(null);
+        return this.requestFeesMapper.toRequestFeesInvoiceDto(requestFees,requestHeader, company);
     }
 }

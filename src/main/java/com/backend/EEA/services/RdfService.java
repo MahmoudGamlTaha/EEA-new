@@ -109,7 +109,9 @@ public class RdfService extends BaseService<Rdf, RdfDto, RdfSearchForm> {
     }
     public Rdf findRdfByRequestId(Long requestId){
         RequestHeader requestHeader = this.requestHeaderRepository.findById(requestId).orElse(null);
-
+           if(requestHeader == null){
+               throw new BusinessException("request error");
+           }
        return this.rdfRepository.findByRequestId(requestId).orElse(null);
     }
 

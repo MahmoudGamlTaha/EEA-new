@@ -72,7 +72,6 @@ public class RequestController extends BaseRestController<RequestHeader, Request
          RequestFeesDto requestFeesDto = this.requestHeaderService.calculateCharge(requestId, currencyRate);
          return buildResponseEntity(true, "success", requestFeesDto,HttpStatus.OK);
     }
-
     @RequestMapping(value = "/request-change-harbor/{requestId}",method = RequestMethod.POST)
     public ResponseEntity<ResponsePojo> createRequestToChangeHarbor(@Valid @RequestBody RequestToChangeHarborDto dto,@PathVariable Long requestId){
         requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,requestId,4L);
@@ -91,4 +90,10 @@ public class RequestController extends BaseRestController<RequestHeader, Request
         return buildResponseEntity(true,"success",null,HttpStatus.OK);
     }
 
+
+    @GetMapping("/request-model/{id}")
+    public ResponseEntity<ResponsePojo> getRequestModel(@PathVariable Long id){
+        RequestHeaderModelDto requestHeaderModelDto = requestHeaderService.getRequestModel(id);
+        return buildResponseEntity(true, "success", requestHeaderModelDto, HttpStatus.OK);
+    }
 }

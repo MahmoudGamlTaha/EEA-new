@@ -2,7 +2,6 @@ package com.backend.EEA.model.dto.masterdata;
 
 import com.backend.EEA.common.config.serialize.JsonDateDeserializer;
 import com.backend.EEA.common.config.serialize.JsonDateSerializer;
-import com.backend.EEA.model.entity.BaseHeaderEntityGen;
 import com.backend.EEA.model.entity.masterdata.Currency;
 import com.backend.EEA.model.entity.masterdata.CurrencyRate;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,38 +11,35 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RequestFeesDto {
-
-    Double edaraFees;
-
-    Double totalTon;
-
-    Double tonPrice;
-
-    Currency currency;
-
-    Long currencyId;
-
-    CurrencyRate currencyRate;
-
-    Double ratioEdaraFee;
-    String paidStatus;
-    Double rdfTotal;
-    AttachmentDto paidInvoice;
+public class RequestFeesInvoiceDto {
+    String EntityName;
+    String establishCode;
+    String requesterName;
+    String paymentType;
+    String invoiceNumber;
+    String FeesInArabic;
+    String companyName;
+    String companyNumber;
     Long requestId;
     Double totalFee;
+    List<RequestFeesInvoiceDetailDto> requestFeesInvoiceDetailDtoList;
     @JsonSerialize(using = JsonDateSerializer.class)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     Date createdDate;
+
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    Date dateFrom;
+
+    @JsonSerialize(using = JsonDateSerializer.class)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    Date dateTo;
 
 }
