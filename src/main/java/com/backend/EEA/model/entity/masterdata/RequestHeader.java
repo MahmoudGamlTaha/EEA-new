@@ -128,6 +128,9 @@ public class RequestHeader extends BaseHeaderEntityGen {
     @OneToMany(mappedBy = "requestHeader")// cascade = CascadeType.ALL)
     private List<Attachment> attachments;
 
+    @OneToMany(mappedBy = "requestHeader")
+    private List<Comment> commentsList;
+
     @Column(name = "category")
     private Integer category;
 

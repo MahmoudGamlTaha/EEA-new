@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -31,4 +33,19 @@ public class Harbor extends BaseHeaderEntityGen {
 
     @Column(name = "harbor_type")
     private HarborType harborType;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "harbor_request_detail",
+            joinColumns = @JoinColumn(name = "harbor_id"),
+            inverseJoinColumns = @JoinColumn(name = "request_detail_id"))
+    private List<RequestDetail> requestDetails = new ArrayList<>();
+
+    public void setRequestDetails(List<RequestDetail> requestDetails) {
+        this.requestDetails = new ArrayList<>(requestDetails);
+    }
+
+    public List<RequestDetail> getRequestDetails() {
+        return new ArrayList<>(requestDetails);
+    }
+
 }

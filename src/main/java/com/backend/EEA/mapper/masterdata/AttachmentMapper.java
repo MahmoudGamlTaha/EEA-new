@@ -9,10 +9,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface AttachmentMapper {
 
     Attachment toAttachment(AttachmentDto attachmentDto);
+
+    List<Attachment> toListOfEntity(List<AttachmentDto> attachmentDtoList);
 
     AttachmentDto toAttachmentDto(Attachment attachment);
     @AfterMapping

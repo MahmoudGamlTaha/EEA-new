@@ -3,9 +3,11 @@ package com.backend.EEA.services;
 import com.backend.EEA.business.dao.repositories.masterdat.*;
 import com.backend.EEA.business.dao.specifications.masterdata.RequestHeaderSpecifications;
 import com.backend.EEA.exceptions.BusinessException;
+import com.backend.EEA.mapper.masterdata.AttachmentMapper;
 import com.backend.EEA.mapper.masterdata.FieldErrorMapper;
 import com.backend.EEA.mapper.masterdata.RequestFeesMapper;
 import com.backend.EEA.mapper.masterdata.RequestHeaderTrackingMapper;
+import com.backend.EEA.mapper.operation.RequestDetailMapper;
 import com.backend.EEA.mapper.operation.RequestHeaderMapper;
 import com.backend.EEA.model.dto.masterdata.*;
 import com.backend.EEA.model.dto.search.RequestHeaderSearchForm;
@@ -13,6 +15,8 @@ import com.backend.EEA.model.entity.masterdata.*;
 import com.backend.EEA.model.entity.operation.Logger;
 import com.backend.EEA.model.enums.CustomerFeesStatus;
 import com.backend.EEA.model.enums.CustomerRequestStatus;
+
+import com.backend.EEA.model.payload.request.AddCommentsToRequestHeaderRequest;
 import com.backend.EEA.model.pojos.SortPojo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -20,13 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
 public class RequestHeaderService extends BaseService<RequestHeader, RequestHeaderDto, RequestHeaderSearchForm> {
+
 
     RequestHeaderRepository requestHeaderRepository;
     RequestHeaderMapper requestHeaderMapper;
@@ -69,6 +75,8 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
     @Autowired
     RequestFeesRepository requestFeesRepository;
+    @Autowired
+    CommentRepository commentRepository;
 
     @Autowired
     RdfRepository rdfRepository;
@@ -76,12 +84,22 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     RequestFeesMapper requestFeesMapper;
 
     @Autowired
-    private   CompanyService companyService;
+    AttachmentMapper attachmentMapper;
 
-    public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper) {
+    @Autowired
+    AttachmentService attachmentService;
+
+   private final HarborRepository harborRepository;
+
+    @Autowired
+    RequestDetailMapper requestDetailMapper;
+     @Autowired
+    private   CompanyService companyService;
+    public RequestHeaderService(RequestHeaderRepository requestHeaderRepository, RequestHeaderMapper requestHeaderMapper, HarborRepository harborRepository) {
         super(requestHeaderRepository);
         this.requestHeaderRepository = requestHeaderRepository;
         this.requestHeaderMapper = requestHeaderMapper;
+        this.harborRepository = harborRepository;
     }
 
 
@@ -618,4 +636,97 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
     }
 
 
+  public RequestHeaderDto addCommentsToRequest(Long requestId, AddCommentsToRequestHeaderRequest request) {
+      RequestHeader requestHeader = requestHeaderRepository.findById(requestId).orElseThrow(()->new BusinessException("Request Header is not found"));
+      for(CommentsDto commentsDto : request.getCommentsList()){
+          Comment comment = new Comment();
+          comment.setComment(commentsDto.getComment());
+          comment.setRequestHeader(requestHeader);
+          commentRepository.save(comment);
+      }
+      return requestHeaderMapper.toRequestHeaderDto(requestHeader);
+  }
+
+    /**
+     * @implNote create request to change harbor or request to complete the quantity
+     */
+  @Transactional
+  public void createRequestToChangeHarborOrCompleteQuantity(RequestToChangeHarborDto request,Long requestId,Long requestTypeId){
+
+        // get request header
+     RequestHeader header=requestHeaderRepository.findById(requestId).orElseThrow(()->new
+             BusinessException("Request Header is not found"));
+
+     // validate request type
+      if(!Objects.equals(requestTypeId, header.getType()))
+          throw new BusinessException("request in not valid");
+
+     // create request detail
+     RequestDetail requestDetail=requestDetailMapper.fromRequestToChangeHarborToEntity(request);
+     requestDetail.setChangerId(getLoggedInUserId());
+     requestDetail.setEntityId(getEntityId());
+     requestDetail.setRequestHeaderId(header.getId());
+     requestDetail.setLastUpdateDate(new Date());
+     requestDetailRepository.save(requestDetail);
+
+     // create attachment
+     request.getOtherAttachment().stream().forEach(a->{
+         a.setRequestHeaderId(header.getId());
+         a.setRequestDetailId(requestDetail.getId());
+         a.setType(a.getAttachmentType().getRequestType());
+         try {
+             attachmentService.createEntity(a);
+         } catch (Exception e) {
+             throw new RuntimeException(e);
+         }
+     });
+
+     // modify harbor with request detail
+      List<Harbor> harbors = harborRepository.findByIdIn(request.getHarborIds());
+      if (!CollectionUtils.isEmpty(harbors)) {
+          harbors.forEach(h -> {
+              List<RequestDetail> existingRequestDetails = new ArrayList<>(h.getRequestDetails());
+              if (!CollectionUtils.isEmpty(existingRequestDetails)) {
+                  existingRequestDetails.add(requestDetail);
+              } else {
+                  existingRequestDetails = Collections.singletonList(requestDetail);
+              }
+              h.setRequestDetails(existingRequestDetails);
+              harborRepository.save(h);
+          });
+      }
+  }
+
+  public void requestApprovalOfTheDevelopedForm(RequestDetailDto requestDetailDto,Long requestId){
+      // get request header
+      RequestHeader header=requestHeaderRepository.findById(requestId).orElseThrow(()->new
+              BusinessException("Request Header is not found"));
+
+
+      // validate request type
+      if(header.getType() != 6L )
+          throw new BusinessException("request in not valid");
+
+      // create request detail
+      RequestDetail requestDetail=requestDetailMapper.toRequestDetail(requestDetailDto);
+      requestDetail.setCreatedDate(new Date());
+      requestDetail.setChangerId(getLoggedInUserId());
+      requestDetail.setEntityId(getEntityId());
+      requestDetail.setLastUpdateDate(new Date());
+      requestDetail.setRequestHeaderId(requestId);
+      requestDetailRepository.save(requestDetail);
+
+      requestDetailDto.getOtherAttachment().stream().forEach(a->{
+          a.setRequestHeaderId(header.getId());
+          a.setRequestDetailId(requestDetail.getId());
+          a.setType(a.getAttachmentType().getRequestType());
+          try {
+              attachmentService.createEntity(a);
+          } catch (Exception e) {
+              throw new RuntimeException(e);
+          }
+      });
+
+
+  }
 }

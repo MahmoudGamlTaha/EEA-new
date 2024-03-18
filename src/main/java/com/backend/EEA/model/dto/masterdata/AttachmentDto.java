@@ -2,12 +2,14 @@ package com.backend.EEA.model.dto.masterdata;
 
 import com.backend.EEA.common.config.serialize.JsonDateDeserializer;
 import com.backend.EEA.common.config.serialize.JsonDateSerializer;
+import com.backend.EEA.model.enums.AttachmentTypeRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.nimbusds.openid.connect.sdk.assurance.evidences.attachment.AttachmentType;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +28,10 @@ public class AttachmentDto {
     private Long id;
 
     private String url;
+
+    private String type;
+
+    private AttachmentTypeRequest attachmentType;
 
     private String name;
 
