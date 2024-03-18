@@ -5,9 +5,11 @@ import com.backend.EEA.model.dto.masterdata.CommentsDto;
 import com.backend.EEA.model.dto.masterdata.RequestHeaderDto;
 import com.backend.EEA.model.dto.search.RequestHeaderSearchForm;
 import com.backend.EEA.model.entity.masterdata.RequestHeader;
+import com.backend.EEA.model.payload.request.AddCommentsToRequestHeaderRequest;
 import com.backend.EEA.model.pojos.ResponsePojo;
 import com.backend.EEA.services.BaseService;
 import com.backend.EEA.services.RequestHeaderService;
+import java.util.List;
 import org.springdoc.webmvc.core.RequestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,7 @@ return null;
         RequestHeaderDto dto = requestHeaderService.addCommentsToRequest(requestId,commentsList);
         return buildResponseEntity(true, "success",dto, HttpStatus.OK);
     }
+
 
 
 }

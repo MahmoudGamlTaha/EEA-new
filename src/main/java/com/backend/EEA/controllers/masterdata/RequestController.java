@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,24 @@ public class RequestController extends BaseRestController<RequestHeader, Request
          RequestFeesDto requestFeesDto = this.requestHeaderService.calculateCharge(requestId, currencyRate);
          return buildResponseEntity(true, "success", requestFeesDto,HttpStatus.OK);
     }
+    @RequestMapping(value = "/request-change-harbor/{requestId}",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> createRequestToChangeHarbor(@Valid @RequestBody RequestToChangeHarborDto dto,@PathVariable Long requestId){
+        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,requestId,4L);
+        return buildResponseEntity(true,"success",null,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/request-complete-quantity/{requestId}",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> createRequestToCompleteQuantity(@Valid @RequestBody RequestToChangeHarborDto dto,@PathVariable Long requestId){
+        requestHeaderService.createRequestToChangeHarborOrCompleteQuantity(dto,requestId,5L);
+        return buildResponseEntity(true,"success",null,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/request-approval-developed-form/{requestId}",method = RequestMethod.POST)
+    public ResponseEntity<ResponsePojo> requestApprovalOfTheDevelopedForm(@Valid @RequestBody RequestDetailDto dto,@PathVariable Long requestId){
+        requestHeaderService.requestApprovalOfTheDevelopedForm(dto,requestId);
+        return buildResponseEntity(true,"success",null,HttpStatus.OK);
+    }
+
 
     @GetMapping("/request-model/{id}")
     public ResponseEntity<ResponsePojo> getRequestModel(@PathVariable Long id){

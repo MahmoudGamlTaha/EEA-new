@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 //@Order(2)
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class JwtFilter  implements Filter {
- //   private static final String jwtTokenCookieName = "JWT-TOKEN";
+    //   private static final String jwtTokenCookieName = "JWT-TOKEN";
     private static final String keySignature = "ydhsskkkk";
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -43,10 +43,10 @@ public class JwtFilter  implements Filter {
         String path = request.getRequestURI();
         System.out.println(path);
 
-         if(request.getMethod().equals("POST") && request.getRequestURI().trim().equals("/EEA/portal-data/customer")){
-             filterChain.doFilter(request, response);
-             return;
-         }
+        if(request.getMethod().equals("POST") && request.getRequestURI().trim().equals("/EEA/portal-data/customer")){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if(token == null || token.isEmpty()){
             response.setHeader("Access-Control-Allow-Origin", "*");
@@ -61,8 +61,8 @@ public class JwtFilter  implements Filter {
             Claims jwtClaims = JwtUtil.getSubject(request, HttpHeaders.AUTHORIZATION, keySignature);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES.mappedFeature());
-           // jwt = jwt.replace("=", ":");
-        //    UserSessionDto dto  = objectMapper.readValue( jwt, UserSessionDto.class);
+            // jwt = jwt.replace("=", ":");
+            //    UserSessionDto dto  = objectMapper.readValue( jwt, UserSessionDto.class);
             setUpSpringAuthentication(jwtClaims);
             filterChain.doFilter(request, response);
 
@@ -76,9 +76,9 @@ public class JwtFilter  implements Filter {
     private void setUpSpringAuthentication(Claims claims) {
         @SuppressWarnings("unchecked")
         List<String> authorities = (List) claims.get("roles");
-         LinkedHashMap<String,Object> authData = ((LinkedHashMap<String,Object>)claims.get("sub"));
-         Integer dateMilliSecond = (Integer) claims.get("iat");
-         //check expired
+        LinkedHashMap<String,Object> authData = ((LinkedHashMap<String,Object>)claims.get("sub"));
+        Integer dateMilliSecond = (Integer) claims.get("iat");
+        //check expired
         //(java.util.Date.getMillisOf(new Date()) -  TimeUnit.MILLISECONDS.convert(20, TimeUnit.DAYS))
         authorities =(List)authData.get("roles");
         UserSessionDto userSessionDto = new UserSessionDto(String.valueOf(authData.get("userName")),"",Long.parseLong(String.valueOf(authData.get("id"))), authorities);
@@ -93,7 +93,7 @@ public class JwtFilter  implements Filter {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
     }
-  //  @Bean
+    //  @Bean
    /* public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.cors().and()
@@ -102,15 +102,15 @@ public class JwtFilter  implements Filter {
                 .antMatchers(HttpMethod.GET, "/EEA/portal-data/customer").permitAll();
         return http.build();
     }*/
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-      CorsConfiguration configuration = new CorsConfiguration();
-      configuration.setAllowedOrigins(Arrays.asList("*"));
-      configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-      configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
-      configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
-      UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-      source.registerCorsConfiguration("/**", configuration);
-      return source;
-  }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

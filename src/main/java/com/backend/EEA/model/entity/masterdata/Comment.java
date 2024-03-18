@@ -1,6 +1,9 @@
 package com.backend.EEA.model.entity.masterdata;
 
 import com.backend.EEA.model.entity.BaseHeaderEntityGen;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -18,5 +21,9 @@ public class Comment extends BaseHeaderEntityGen {
 
     @OneToMany(mappedBy = "comment")
     private List<Attachment> attachments;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_header_id")
+    private RequestHeader requestHeader;
 
 }
