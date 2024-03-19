@@ -19,6 +19,9 @@ public class RequestType extends BaseDetailEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "code")
+    private String code;
+
 
     @Override
     public int hashCode() {

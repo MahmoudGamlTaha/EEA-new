@@ -91,6 +91,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
    private final HarborRepository harborRepository;
 
+   @Autowired
+   RequestTypeRepository requestTypeRepository;
+
     @Autowired
     RequestDetailMapper requestDetailMapper;
      @Autowired
@@ -728,7 +731,100 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
               throw new RuntimeException(e);
           }
       });
-
-
   }
+
+  @Transactional
+  public RequestHeaderDto createRequestForApprovalToExportCharcoal(RequestHeaderDto requestHeaderDto,Long requestTypeId){
+
+      // validate request header
+      RequestHeader requestHeader=requestHeaderMapper.toRequestHeader(requestHeaderDto);
+      if(Objects.isNull(requestHeader.getLandingHarborId()))
+          throw new BusinessException("landing harbor can not be null");
+
+      RequestType requestType=requestTypeRepository.findById(requestTypeId).orElseThrow(()->new BusinessException
+              ("request is not valid"));
+      if(!Objects.equals(requestType.getCode(),"RA"))
+          throw new BusinessException("request is not valid");
+
+      requestHeader.setChangerId(getLoggedInUserId());
+      requestHeader.setLastUpdateDate(new Date());
+      requestHeader.setEntityId(getEntityId());
+      requestHeader.setType(requestTypeId);
+      List<RequestDetail> requestDetails=requestHeader.getRequestDetail();
+      requestHeaderRepository.save(requestHeader);
+
+      // save request detail
+      if(!CollectionUtils.isEmpty(requestDetails)){
+          requestDetails.forEach(f->{
+              f.setRequestHeaderId(requestHeader.getRequesterId());
+              f.setLastUpdateDate(new Date());
+              f.setChangerId(getLoggedInUserId());
+              f.setEntityId(getEntityId());
+              validateRequestForApprovalToExportCharcoalData(f);
+          });
+      }
+      requestDetailRepository.saveAll(requestDetails);
+
+
+      //update harbor
+      List<Harbor> harbors = harborRepository.findByIdIn(requestDetails.get(0).getHarborIds());
+      if (!CollectionUtils.isEmpty(harbors)) {
+          harbors.forEach(h -> {
+              List<RequestDetail> existingRequestDetails = new ArrayList<>(h.getRequestDetails());
+              if (!CollectionUtils.isEmpty(existingRequestDetails)) {
+                  existingRequestDetails.add(requestDetails.get(0));
+              } else {
+                  existingRequestDetails = Collections.singletonList(requestDetails.get(0));
+              }
+              h.setRequestDetails(existingRequestDetails);
+              harborRepository.save(h);
+          });
+      }
+
+      //update attachment
+      requestHeader.getRequestDetail().forEach(r->{
+          r.getOtherAttachment().forEach(a->{
+              updateAttachment(a,requestHeader.getId(),r.getId());
+          });
+      });
+      return requestHeaderMapper.toRequestHeaderDto(requestHeader);
+  }
+
+
+  private void validateRequestForApprovalToExportCharcoalData(RequestDetail requestDetail){
+      if(Objects.isNull(requestDetail.getAmountOfVegetableRennet()))
+          throw new BusinessException("type is not valid");
+
+      if(Objects.isNull(requestDetail.getIndustrialRegister()))
+          throw new BusinessException("Industrial Register not valid");
+
+      if(Objects.isNull(requestDetail.getNotesForTheChiefOfStaff()))
+          throw new BusinessException("notes forThe chief of staff not valid");
+
+      if(Objects.isNull(requestDetail.getType()))
+          throw new BusinessException("coal type is not valid");
+
+      if(CollectionUtils.isEmpty(requestDetail.getHarborIds()))
+          throw new BusinessException("harbor can not be null");
+
+      if(CollectionUtils.isEmpty(requestDetail.getOtherAttachment())){
+          throw new BusinessException("attachment can not be null");
+      }
+  }
+
+  private void updateAttachment(Attachment attachment,Long requestId,Long requestDetailId){
+      Attachment attachment1 = this.attachmentRepository.findById(attachment.getId()).orElse(null);
+      if(attachment1 == null){
+          throw new BusinessException("File error "+ attachment.getUrl());
+      };
+      attachment1.setId(attachment.getId());
+      attachment1.setRequestHeaderId(requestId);
+      attachment1.setFileField(attachment.getFileField());
+      attachment1.setTemp(false);
+      attachment1.setEntityId(getEntityId());
+      attachment1.setChangerId(getLoggedInUserId());
+      attachment1.setRequestDetailId(requestDetailId);
+      attachmentRepository.save(attachment1);
+  }
+
 }

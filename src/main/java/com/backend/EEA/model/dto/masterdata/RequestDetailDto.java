@@ -5,22 +5,21 @@ import com.backend.EEA.model.entity.masterdata.Company;
 import com.backend.EEA.model.entity.masterdata.CompanyActivity;
 import com.backend.EEA.model.entity.masterdata.Government;
 import com.backend.EEA.model.enums.OperatingTimePerCycle;
+import com.backend.EEA.model.enums.TypeOfCharcoal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.NumberFormat;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Setter
+@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RequestDetailDto {
 
@@ -75,4 +74,14 @@ public class RequestDetailDto {
  private String disposalOfHazardousWaste;
 
  private OperatingTimePerCycle timePerCycle;
+
+ private String industrialRegister;
+
+ private Integer amountOfVegetableRennet;
+
+ private String notesForTheChiefOfStaff;
+
+ private TypeOfCharcoal type;
+
+ List<Long> harborIds;
 }
