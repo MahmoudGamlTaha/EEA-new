@@ -40,6 +40,7 @@ public class RequestFees extends BaseHeaderEntityGen {
 
     @Column(name = "paid_status")
     String paidStatus;
+
     @Column(name = "total_fees")
     Double totalFees;
     @Column(name = "rdf_fees")

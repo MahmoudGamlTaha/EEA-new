@@ -9,6 +9,7 @@ import com.backend.EEA.model.entity.masterdata.Company;
 import com.backend.EEA.model.entity.masterdata.RequestFees;
 import com.backend.EEA.model.entity.masterdata.RequestHeader;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedList;
@@ -16,8 +17,11 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {CurrencyRateMapper.class})
 public interface RequestFeesMapper {
+    @Mapping(source = "rdfTotal", target = "rdfFees")
+    @Mapping(source = "totalFee", target = "totalFees")
     RequestFees toEntity(RequestFeesDto requestFeesDto);
-
+    @Mapping(target = "rdfTotal", source = "rdfFees")
+    @Mapping(target = "totalFee", source = "totalFees")
     RequestFeesDto toDto(RequestFees requestFees);
     default RequestFeesInvoiceDto toRequestFeesInvoiceDto(RequestFees requestFees, RequestHeader requestHeader, Company company){
         RequestFeesInvoiceDto requestFeesInvoiceDto = new RequestFeesInvoiceDto();
