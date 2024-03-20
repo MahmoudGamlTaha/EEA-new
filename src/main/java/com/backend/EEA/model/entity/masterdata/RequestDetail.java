@@ -2,6 +2,7 @@ package com.backend.EEA.model.entity.masterdata;
 
 import com.backend.EEA.model.entity.BaseHeaderEntityGen;
 import com.backend.EEA.model.enums.OperatingTimePerCycle;
+import com.backend.EEA.model.enums.TypeOfCharcoal;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -120,4 +121,19 @@ public class RequestDetail extends BaseHeaderEntityGen {
 
     @Column(name = "time_per_cycle")
     private OperatingTimePerCycle timePerCycle;
+
+    @Column(name = "the_industrial_register_to_be_used")
+    private String industrialRegister;
+
+    @Column(name = "amount_of_vegetable_rennet")
+    private Integer amountOfVegetableRennet;
+
+    @Column(name = "notes_for_the_chief_of_staff")
+    private String notesForTheChiefOfStaff;
+
+    @Enumerated(EnumType.ORDINAL)
+    private TypeOfCharcoal type;
+
+    @Transient
+    List<Long> harborIds;
 }
