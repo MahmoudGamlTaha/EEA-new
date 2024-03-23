@@ -97,7 +97,7 @@ public class RequestController extends BaseRestController<RequestHeader, Request
         return buildResponseEntity(true, "success", requestHeaderModelDto, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/request-for-approval-to-export-charcoal/{requestTypeId}",method = RequestMethod.POST)
+    @RequestMapping(value = "/plant-coal/{requestTypeId}",method = RequestMethod.POST)
     public ResponseEntity<ResponsePojo> createRequestForApprovalToExportCharcoal(@RequestBody RequestHeaderDto dto,@PathVariable Long requestTypeId){
         return buildResponseEntity(true,"success",requestHeaderService.
                 createRequestForApprovalToExportCharcoal(dto,requestTypeId),HttpStatus.OK);

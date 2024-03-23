@@ -125,8 +125,8 @@ public class RequestDetail extends BaseHeaderEntityGen {
     @Column(name = "the_industrial_register_to_be_used")
     private String industrialRegister;
 
-    @Column(name = "amount_of_vegetable_rennet")
-    private Integer amountOfVegetableRennet;
+    @Column(name = "amount_of_vegetable_rennet")  //should name changed
+    private Double amountOfCoalPlanInTon;
 
     @Column(name = "notes_for_the_chief_of_staff")
     private String notesForTheChiefOfStaff;
@@ -134,6 +134,12 @@ public class RequestDetail extends BaseHeaderEntityGen {
     @Enumerated(EnumType.ORDINAL)
     private TypeOfCharcoal type;
 
+    //@Enumerated(EnumType.ORDINAL)
+    private Long coalTypeId;
+
     @Transient
     List<Long> harborIds;
+
+    @Column(name = "landing_harbor_id")
+    Long landingHarborId;
 }

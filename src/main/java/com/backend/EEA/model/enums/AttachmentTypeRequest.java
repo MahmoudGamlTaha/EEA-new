@@ -28,8 +28,8 @@ INSURANCE_POLICY("INSURANCE_POLICY"), COMPANY_CONTRACT_COAL("COMPANY_CONTRACT_CO
     CERTIFIED_ENGINEERING_DRAWING("Certified engineering drawing"),
     A_DETAILED_STUDY_THAT_INCLUDES_BASIC_DATA("A detailed study that includes basic data"),
     PREPARING_A_PRESENTATION("Preparing a presentation"),
-    PROVIDE_ENVIRONMENTAL_MEASUREMENTS_OF_EMISSIONS("Provide environmental measurements of emissions");
-
+    PROVIDE_ENVIRONMENTAL_MEASUREMENTS_OF_EMISSIONS("Provide environmental measurements of emissions"),
+    Plant_COAL_ORGINAL_CONTRACT("Plant_COAL_ORGINAL_CONTRACT");
 
     private final String requestType;
 

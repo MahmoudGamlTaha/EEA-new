@@ -75,13 +75,13 @@ public class RequestDetailDto {
 
  private OperatingTimePerCycle timePerCycle;
 
- private String industrialRegister;
+ private Long industrialRegister;
 
- private Integer amountOfVegetableRennet;
+ private Integer amountOfCoalPlanInTon;
 
  private String notesForTheChiefOfStaff;
 
- private TypeOfCharcoal type;
-
+ private Long coalTypeId;
+ private Long landingHarborId;
  List<Long> harborIds;
 }

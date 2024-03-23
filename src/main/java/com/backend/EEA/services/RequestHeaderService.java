@@ -743,14 +743,22 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
 
       RequestType requestType=requestTypeRepository.findById(requestTypeId).orElseThrow(()->new BusinessException
               ("request is not valid"));
-      if(!Objects.equals(requestType.getCode(),"RA"))
+      if(!Objects.equals(requestType.getCode(),"coal-plant"))
           throw new BusinessException("request is not valid");
 
       requestHeader.setChangerId(getLoggedInUserId());
+      requestHeader.setRequesterId(getLoggedInUserId());
       requestHeader.setLastUpdateDate(new Date());
       requestHeader.setEntityId(getEntityId());
       requestHeader.setType(requestTypeId);
+      requestHeader.setCategory(5);
+       AdministrativeStructure structure = this.administrativeStructureRepository.findByCode("coal-plant");
+      requestHeader.setAdministrativeForwardTo(structure.getId());
+      requestHeader.setStatus(CustomerRequestStatus.Created);
       List<RequestDetail> requestDetails=requestHeader.getRequestDetail();
+      RequestDetail requestDetail = requestDetails.stream().findFirst().get(); // front sent id of company of selected industrial register
+      String industryNumber = this.companyRepository.findById(requestDetail.getCompanyId()).get().getIndustryNumber();
+     requestHeader.setCompanyId(requestDetail.getCompanyId());
       requestHeaderRepository.save(requestHeader);
 
       // save request detail
@@ -760,21 +768,22 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
               f.setLastUpdateDate(new Date());
               f.setChangerId(getLoggedInUserId());
               f.setEntityId(getEntityId());
+              f.setIndustrialRegister(industryNumber);
               validateRequestForApprovalToExportCharcoalData(f);
           });
       }
-      requestDetailRepository.saveAll(requestDetails);
+      requestDetails = requestDetailRepository.saveAll(requestDetails);
+       List<RequestDetail> requestDetails1 = requestDetails;
 
-
-      //update harbor
-      List<Harbor> harbors = harborRepository.findByIdIn(requestDetails.get(0).getHarborIds());
+      //update harbor should refactor
+      List<Harbor> harbors = harborRepository.findByIdIn(requestHeaderDto.getRequestDetail().get(0).getHarborIds());
       if (!CollectionUtils.isEmpty(harbors)) {
           harbors.forEach(h -> {
               List<RequestDetail> existingRequestDetails = new ArrayList<>(h.getRequestDetails());
               if (!CollectionUtils.isEmpty(existingRequestDetails)) {
-                  existingRequestDetails.add(requestDetails.get(0));
+                  existingRequestDetails.add(requestDetails1.get(0));
               } else {
-                  existingRequestDetails = Collections.singletonList(requestDetails.get(0));
+                  existingRequestDetails = Collections.singletonList(requestDetails1.get(0));
               }
               h.setRequestDetails(existingRequestDetails);
               harborRepository.save(h);
@@ -782,27 +791,28 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
       }
 
       //update attachment
-      requestHeader.getRequestDetail().forEach(r->{
+      requestDetails.forEach(r->{
           r.getOtherAttachment().forEach(a->{
-              updateAttachment(a,requestHeader.getId(),r.getId());
+              updateAttachment(a,r.getId());
           });
       });
+      this.Log(requestHeader.getId(), getLoggedInUserSession(), CustomerRequestStatus.Created.name(), null);
       return requestHeaderMapper.toRequestHeaderDto(requestHeader);
   }
 
 
   private void validateRequestForApprovalToExportCharcoalData(RequestDetail requestDetail){
-      if(Objects.isNull(requestDetail.getAmountOfVegetableRennet()))
+      if(Objects.isNull(requestDetail.getAmountOfCoalPlanInTon()))
           throw new BusinessException("type is not valid");
 
       if(Objects.isNull(requestDetail.getIndustrialRegister()))
           throw new BusinessException("Industrial Register not valid");
 
-      if(Objects.isNull(requestDetail.getNotesForTheChiefOfStaff()))
-          throw new BusinessException("notes forThe chief of staff not valid");
+      //if(Objects.isNull(requestDetail.getNotesForTheChiefOfStaff()))
+        //  throw new BusinessException("notes forThe chief of staff not valid");
 
-      if(Objects.isNull(requestDetail.getType()))
-          throw new BusinessException("coal type is not valid");
+    //  if(Objects.isNull(requestDetail.getType()))
+      //    throw new BusinessException("coal type is not valid");
 
       if(CollectionUtils.isEmpty(requestDetail.getHarborIds()))
           throw new BusinessException("harbor can not be null");
@@ -812,13 +822,13 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
       }
   }
 
-  private void updateAttachment(Attachment attachment,Long requestId,Long requestDetailId){
+  private void updateAttachment(Attachment attachment,Long requestDetailId){
       Attachment attachment1 = this.attachmentRepository.findById(attachment.getId()).orElse(null);
       if(attachment1 == null){
           throw new BusinessException("File error "+ attachment.getUrl());
       };
       attachment1.setId(attachment.getId());
-      attachment1.setRequestHeaderId(requestId);
+     // attachment1.setRequestHeaderId(requestId);
       attachment1.setFileField(attachment.getFileField());
       attachment1.setTemp(false);
       attachment1.setEntityId(getEntityId());

@@ -10,4 +10,5 @@ public interface AdministrativeStructureRepository extends GenericJPARepository<
     AdministrativeStructure findFirstByParentIdAndEntityId(Long parentId, Long entityId);
 
     AdministrativeStructure findFirstByNameAndEntityId(String name, Long entityId);
+    AdministrativeStructure findByCode(String code);
 }
