@@ -113,4 +113,13 @@ public class RequestHeaderDto {
     private Date createdDate;
 
     private int category;
+
+    // to validate all data of Request Detail
+    private RequestDetailDto openStorage;
+
+    private RequestDetailDto closeStorage;
+
+    List<RequestDetailDto> quantitiesOfCoalInTheRoastingYards;
+
+    List<RequestDetailDto> quantitiesOfCoalTradedDuring;
 }

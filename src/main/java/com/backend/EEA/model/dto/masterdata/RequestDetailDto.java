@@ -5,7 +5,9 @@ import com.backend.EEA.model.entity.masterdata.Company;
 import com.backend.EEA.model.entity.masterdata.CompanyActivity;
 import com.backend.EEA.model.entity.masterdata.Government;
 import com.backend.EEA.model.enums.OperatingTimePerCycle;
+import com.backend.EEA.model.enums.StorageType;
 import com.backend.EEA.model.enums.TypeOfCharcoal;
+import com.backend.EEA.model.enums.TypesAndQuantitiesOfCoal;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -84,4 +86,28 @@ public class RequestDetailDto {
  private Long coalTypeId;
  private Long landingHarborId;
  List<Long> harborIds;
+
+ private TypesAndQuantitiesOfCoal typesAndQuantitiesOfCoal;
+
+ private Date shipmentDate;
+
+ private CompanyDto companyCarrier;
+
+ private Long companyCarrierId;
+
+ private StorageType storageType;
+
+ private String embroideryEquipment;
+
+ private Integer theHeightOfTheCoal;
+
+ private Integer estimatedQuantityOfStoredCoal;
+
+ private String availabilityOfCarbonMonoxideDevices;
+
+ private String warehouseVentilationSystem;
+
+ private String storeFloorType;
+
+ private String windbreaksAreFlat;
 }
