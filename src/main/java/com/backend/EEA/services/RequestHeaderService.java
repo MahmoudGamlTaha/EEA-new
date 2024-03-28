@@ -837,4 +837,72 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
       attachmentRepository.save(attachment1);
   }
 
+  @Transactional
+  public RequestHeaderDto createCoalRelatedProceduresRequest(RequestHeaderDto requestHeaderDto,Long requestTypeId){
+      validateCoalRelated(requestHeaderDto);
+      RequestHeaderDto dto=validateCoalRelated(requestHeaderDto);
+      RequestHeader requestHeader=requestHeaderMapper.toRequestHeader(dto);
+
+      RequestType requestType=requestTypeRepository.findById(requestTypeId).orElseThrow(()->new BusinessException
+              ("request is not valid"));
+      if(!Objects.equals(requestType.getCode(),"RW"))
+          throw new BusinessException("request is not valid");
+
+      // save request header
+      requestHeader.setChangerId(getLoggedInUserId());
+      requestHeader.setRequesterId(getLoggedInUserId());
+      requestHeader.setLastUpdateDate(new Date());
+      requestHeader.setEntityId(getEntityId());
+      List<RequestDetail> requestDetails=requestHeader.getRequestDetail();
+      requestHeader.setRequestDetail(null);
+      requestHeader.setStatus(CustomerRequestStatus.Created);
+      requestHeaderRepository.save(requestHeader);
+
+      // save request details
+      if(!CollectionUtils.isEmpty(requestDetails)){
+          requestDetails.forEach(f->{
+              f.setRequestHeaderId(requestHeader.getId());
+              f.setLastUpdateDate(new Date());
+              f.setChangerId(getLoggedInUserId());
+              f.setEntityId(getEntityId());
+          });
+          requestDetailRepository.saveAll(requestDetails);
+      }
+
+
+
+      //update attachment
+      requestDetails.forEach(r->{
+          r.getOtherAttachment().forEach(a->{
+              updateAttachment(a,r.getId());
+          });
+      });
+      this.Log(requestHeader.getId(), getLoggedInUserSession(), CustomerRequestStatus.Created.name(), null);
+      return requestHeaderMapper.toRequestHeaderDto(requestHeader);
+  }
+
+  private RequestHeaderDto validateCoalRelated(RequestHeaderDto requestHeaderDto){
+
+      if(Objects.isNull(requestHeaderDto.getOpenStorage()))
+          throw new BusinessException("open storage can not be null");
+
+      if(Objects.isNull(requestHeaderDto.getCloseStorage()))
+          throw new BusinessException("close storage can not be null");
+
+      if(CollectionUtils.isEmpty(requestHeaderDto.getQuantitiesOfCoalTradedDuring()))
+          throw new BusinessException("Quantities Of Coal Traded During can not be empty");
+
+      if(CollectionUtils.isEmpty(requestHeaderDto.getQuantitiesOfCoalInTheRoastingYards()))
+          throw new BusinessException("Quantities Of Coal In The Roasting Yards can not be empty");
+
+      // add all Request Detail to list
+      List<RequestDetailDto> requestDetailDtos = new ArrayList<>();
+      requestDetailDtos.add(requestHeaderDto.getOpenStorage());
+      requestDetailDtos.add(requestHeaderDto.getCloseStorage());
+      requestDetailDtos.addAll(requestHeaderDto.getQuantitiesOfCoalInTheRoastingYards());
+      requestDetailDtos.addAll(requestHeaderDto.getQuantitiesOfCoalTradedDuring());
+      requestHeaderDto.setRequestDetail(requestDetailDtos);
+      return requestHeaderDto;
+  }
+
 }

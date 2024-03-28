@@ -29,7 +29,21 @@ INSURANCE_POLICY("INSURANCE_POLICY"), COMPANY_CONTRACT_COAL("COMPANY_CONTRACT_CO
     A_DETAILED_STUDY_THAT_INCLUDES_BASIC_DATA("A detailed study that includes basic data"),
     PREPARING_A_PRESENTATION("Preparing a presentation"),
     PROVIDE_ENVIRONMENTAL_MEASUREMENTS_OF_EMISSIONS("Provide environmental measurements of emissions"),
-    Plant_COAL_ORGINAL_CONTRACT("Plant_COAL_ORGINAL_CONTRACT");
+    Plant_COAL_ORGINAL_CONTRACT("Plant COAL ORGINAL CONTRACT"),
+
+    //Coal related procedures
+    THE_HEIGHT_OF_THE_COAL("The height of the coal"),
+    EMBROIDERY_EQUIPMENT("Embroidery equipment"),
+    RESULTS_OF_DUST_EMISSIONS_MEASUREMENTS_WITHIN_LIMITS("Results of dust emissions measurements within limits"),
+    RESULTS_OF_DUST_EMISSIONS_MEASUREMENTS_ARE_OUTSIDE_THE_LIMITS("The results of dust emissions measurements are outside the limits"),
+    ESTIMATED_QUANTITY_OF_STORED_COAL("Estimated quantity of stored coal"),
+    AVAILABILITY_OF_CARBON_MONOXIDE_DEVICES("Availability of carbon monoxide devices"),
+    WAREHOUSE_VENTILATION_SYSTEM("Warehouse Ventilation System"),
+    STORE_FLOOR_TYPE("Store floor type"),
+    FIRE_FIGHTING_EQUIPMENT("Fire fighting equipment"),
+    THERE_IS_A_CLOTH_FILTER("There is a cloth filter"),
+    WINDBREAKS_ARE_FLAT("Windbreaks are flat")
+    ;
 
     private final String requestType;
 

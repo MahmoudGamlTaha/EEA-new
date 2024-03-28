@@ -2,7 +2,9 @@ package com.backend.EEA.model.entity.masterdata;
 
 import com.backend.EEA.model.entity.BaseHeaderEntityGen;
 import com.backend.EEA.model.enums.OperatingTimePerCycle;
+import com.backend.EEA.model.enums.StorageType;
 import com.backend.EEA.model.enums.TypeOfCharcoal;
+import com.backend.EEA.model.enums.TypesAndQuantitiesOfCoal;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -142,4 +144,47 @@ public class RequestDetail extends BaseHeaderEntityGen {
 
     @Column(name = "landing_harbor_id")
     Long landingHarborId;
+
+    //Coal related procedures
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "types_and_quantities_of_coal")
+    private TypesAndQuantitiesOfCoal typesAndQuantitiesOfCoal;
+
+    @Column(name = "shipment_date")
+    private Date shipmentDate;
+
+    @ManyToOne
+    @JoinColumn(name = "company_carrier_id",insertable = false,updatable = false)
+    private Company companyCarrier;
+
+    @Column(name = "company_carrier_id")
+    private Long companyCarrierId;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "storage_type")
+    private StorageType storageType;
+
+    @Column(name = "embroidery_equipment")
+    private String embroideryEquipment;
+
+    @Column(name = "the_height_of_the_coal")
+    private Integer theHeightOfTheCoal;
+
+    @Column(name = "estimated_quantity_of_stored_coal")
+    private Integer estimatedQuantityOfStoredCoal;
+
+    @Column(name = "availability_of_carbon_monoxide_devices")
+    private String availabilityOfCarbonMonoxideDevices;
+
+    @Column(name = "warehouse_ventilation_system")
+    private String warehouseVentilationSystem;
+
+    @Column(name = "store_floor_type")
+    private String storeFloorType;
+
+    @Column(name = "windbreaks_are_flat")
+    private String windbreaksAreFlat;
+
+    @Column(name = "fire_fighting_qquipment")
+    private String fireFightingEquipment;
 }
