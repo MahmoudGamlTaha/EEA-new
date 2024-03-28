@@ -150,7 +150,7 @@ public class RequestDetail extends BaseHeaderEntityGen {
     @Column(name = "types_and_quantities_of_coal")
     private TypesAndQuantitiesOfCoal typesAndQuantitiesOfCoal;
 
-    @Column(name = "shipment date")
+    @Column(name = "shipment_date")
     private Date shipmentDate;
 
     @ManyToOne
@@ -184,4 +184,7 @@ public class RequestDetail extends BaseHeaderEntityGen {
 
     @Column(name = "windbreaks_are_flat")
     private String windbreaksAreFlat;
+
+    @Column(name = "fire_fighting_qquipment")
+    private String fireFightingEquipment;
 }

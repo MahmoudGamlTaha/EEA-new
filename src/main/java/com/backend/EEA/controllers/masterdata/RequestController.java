@@ -104,7 +104,7 @@ public class RequestController extends BaseRestController<RequestHeader, Request
     }
 
     @RequestMapping(value = "/coal-related-procedures/{requestType}",method = RequestMethod.POST)
-    public ResponseEntity<ResponsePojo> createCoalRelatedProceduresRequest(@RequestBody RequestHeaderDto requestHeaderDto,Long requestType){
+    public ResponseEntity<ResponsePojo> createCoalRelatedProceduresRequest(@RequestBody RequestHeaderDto requestHeaderDto,@PathVariable Long requestType){
         return buildResponseEntity(true,"success",requestHeaderService.
                 createCoalRelatedProceduresRequest(requestHeaderDto,requestType),HttpStatus.OK);
     }

@@ -837,6 +837,7 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
       attachmentRepository.save(attachment1);
   }
 
+  @Transactional
   public RequestHeaderDto createCoalRelatedProceduresRequest(RequestHeaderDto requestHeaderDto,Long requestTypeId){
       validateCoalRelated(requestHeaderDto);
       RequestHeaderDto dto=validateCoalRelated(requestHeaderDto);
@@ -860,13 +861,14 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
       // save request details
       if(!CollectionUtils.isEmpty(requestDetails)){
           requestDetails.forEach(f->{
-              f.setRequestHeaderId(requestHeader.getRequesterId());
+              f.setRequestHeaderId(requestHeader.getId());
               f.setLastUpdateDate(new Date());
               f.setChangerId(getLoggedInUserId());
               f.setEntityId(getEntityId());
           });
+          requestDetailRepository.saveAll(requestDetails);
       }
-      requestDetailRepository.saveAll(requestDetails);
+
 
 
       //update attachment
@@ -894,8 +896,9 @@ public class RequestHeaderService extends BaseService<RequestHeader, RequestHead
           throw new BusinessException("Quantities Of Coal In The Roasting Yards can not be empty");
 
       // add all Request Detail to list
-      List<RequestDetailDto> requestDetailDtos=Arrays.asList(requestHeaderDto.getOpenStorage(),
-              requestHeaderDto.getCloseStorage());
+      List<RequestDetailDto> requestDetailDtos = new ArrayList<>();
+      requestDetailDtos.add(requestHeaderDto.getOpenStorage());
+      requestDetailDtos.add(requestHeaderDto.getCloseStorage());
       requestDetailDtos.addAll(requestHeaderDto.getQuantitiesOfCoalInTheRoastingYards());
       requestDetailDtos.addAll(requestHeaderDto.getQuantitiesOfCoalTradedDuring());
       requestHeaderDto.setRequestDetail(requestDetailDtos);
